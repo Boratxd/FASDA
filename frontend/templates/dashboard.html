@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FASDA Dashboard</title>
+    <style>
+        /* Temel Sayfa Ayarları */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            /* Arka Plan */
+            background-image: url("{{ url_for('static', filename='images/what-is-signature.jpeg') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            /* Ortalama */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Ana Kutu */
+        .dashboard-card {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 350px;
+            text-align: center;
+            color: white;
+        }
+
+        h2 {
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 15px;
+        }
+
+        /* Liste Stilini Sıfırlama */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 15px;
+        }
+
+        /* Menü Butonları (Linkler) */
+        .menu-btn {
+            display: block; /* Tüm satırı kaplar */
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.1); /* Hafif transparan */
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease; /* Yumuşak geçiş */
+        }
+
+        /* Butonun üzerine gelince */
+        .menu-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px); /* Hafif yukarı kalkar */
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Çıkış Butonu (Özel Stil) */
+        .logout-btn {
+            background-color: rgba(220, 53, 69, 0.6); /* Kırmızımsı */
+            margin-top: 30px; /* Diğerlerinden ayır */
+            border: 1px solid rgba(220, 53, 69, 0.8);
+        }
+
+        .logout-btn:hover {
+            background-color: rgba(220, 53, 69, 0.9);
+            transform: translateY(-3px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-card">
+        <h2>FASDA Dashboard</h2>
+
+        <ul>
+            <li>
+                <a href="/verify" class="menu-btn">Verify Single Signature</a>
+            </li>
+            <li>
+                <a href="/plots" class="menu-btn">Plot Similarity Distributions</a>
+            </li>
+            <li>
+                <a href="/benchmark" class="menu-btn">Generate Benchmark Graphs</a>
+            </li>
+
+            <li>
+                <a href="/logout" class="menu-btn logout-btn">Logout</a>
+            </li>
+        </ul>
+    </div>
+
+</body>
+</html>

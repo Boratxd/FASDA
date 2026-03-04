@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Signature</title>
+    <style>
+        /* Temel Sayfa Ayarları */
+        body {
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+            /* Arka Plan */
+            background-image: url("{{ url_for('static', filename='images/what-is-signature.jpeg') }}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+
+            /* Ortalama */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Ana Kutu Tasarımı */
+        .container {
+            background-color: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            color: white;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .results-header {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+            color: #e0e0e0;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        input:focus { outline: none; box-shadow: 0 0 5px #4a90e2; }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: white;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        ::-webkit-file-upload-button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-verify {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-verify:hover { background-color: #0056b3; }
+
+        .result-text {
+            font-size: 16px;
+            margin: 10px 0;
+            text-align: left;
+            width: 100%;
+        }
+
+        .decision-result {
+            margin-top: 25px;
+            font-size: 1.8em;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(74, 144, 226, 0.7);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 30px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        .back-link:hover {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Verify Single Signature</h2>
+
+        <form action="" method="post" enctype="multipart/form-data">
+
+            <input type="text" name="student_id" placeholder="Student ID (001–400)" required>
+
+            <input type="file" name="signature" required accept="image/*">
+
+            <button type="submit" class="btn-verify">VERIFY</button>
+        </form>
+
+        {% if result %}
+            <h3 class="results-header">Analysis Results</h3>
+
+            <div style="text-align: left; display: inline-block; width: 100%;">
+                <p class="result-text"><strong>CNN Similarity:</strong> {{ result.cnn }}</p>
+                <p class="result-text"><strong>HOG Similarity:</strong> {{ result.hog }}</p>
+                <p class="result-text"><strong>Hybrid Score:</strong> {{ result.hybrid }}</p>
+            </div>
+
+            <h2 class="decision-result">{{ result.decision }}</h2>
+        {% endif %}
+
+        <br>
+        <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+    </div>
+
+</body>
+</html>
