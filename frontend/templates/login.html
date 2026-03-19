@@ -1,107 +1,101 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FASDA Login</title>
+    <title>FASDA | Login</title>
     <style>
-
+        :root {
+            --bg-1: #07111f; --bg-2: #0f1f38; --card: rgba(9, 18, 34, 0.78);
+            --border: rgba(255, 255, 255, 0.12); --text: #eef4ff; --muted: #a8b6d3;
+            --primary: #4f8cff; --primary-hover: #3d79eb; --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+            --radius: 22px; --danger: #ff9aae; --danger-bg: rgba(255,93,115,.12);
+        }
+        * { box-sizing: border-box; }
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
-            /* backgroun image*/
-            background-image: url("{{ url_for('static', filename='images/what-is-signature.jpeg') }}");
-            background-size: cover; /* full */
-            background-position: center; /* ortala */
-            background-repeat: no-repeat;
-
-            /*Flexbox - to center it */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0; min-height: 100vh; font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(79, 140, 255, 0.18), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(71, 214, 193, 0.16), transparent 24%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            display: grid; place-items: center; padding: 24px;
         }
-
-        /* login box's div */
-        .login-card {
-            background-color: rgba(255, 255, 255, 0.15); /* Yarı saydam beyaz */
-            backdrop-filter: blur(10px); /* Buzlu cam efekti */
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            width: 300px;
-            text-align: center;
-            color: white;
+        .login-shell { width: 100%; max-width: 980px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; }
+        .brand-panel, .login-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            backdrop-filter: blur(16px); box-shadow: var(--shadow);
         }
-
-        /* title style, ötekilerle aynı */
-        h2 {
-            margin-bottom: 20px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+        .brand-panel { padding: 42px; display:flex; flex-direction:column; justify-content:space-between; min-height:620px; }
+        .badge {
+            width: fit-content; padding: 8px 14px; border-radius: 999px; font-size: 13px; letter-spacing: .4px;
+            color: #d7e4ff; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.08);
         }
-
-        /* Input */
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.9);
-            box-sizing: border-box; /* Padding'in genişliği bozmasını engeller */
-            font-size: 14px;
+        .brand-panel h1 { margin:20px 0 12px; font-size: clamp(34px, 5vw, 52px); line-height:1.05; }
+        .brand-panel p { margin:0; max-width:520px; color:var(--muted); line-height:1.75; font-size:16px; }
+        .features { display:grid; gap:14px; margin-top:30px; }
+        .feature { padding:16px 18px; border-radius:16px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.07);}
+        .feature strong { display:block; margin-bottom:6px; font-size:15px; }
+        .feature span { color:var(--muted); font-size:14px; line-height:1.6; }
+        .login-card { padding:36px; display:flex; flex-direction:column; justify-content:center; }
+        .login-card h2 { margin:0 0 8px; font-size:30px; }
+        .login-card .subtext { margin:0 0 28px; color:var(--muted); line-height:1.6; }
+        .field { margin-bottom:16px; }
+        .field label { display:block; margin-bottom:8px; font-size:14px; color:#dce7ff; }
+        .field input {
+            width:100%; padding:15px 16px; border-radius:14px; border:1px solid rgba(255,255,255,.1);
+            background:rgba(255,255,255,.06); color:var(--text); font-size:15px; outline:none;
         }
-
-        input:focus {
-            outline: none;
-            box-shadow: 0 0 5px #4a90e2;
+        .field input::placeholder { color:#96a7ca; }
+        .login-btn {
+            width:100%; margin-top:10px; padding:15px 18px; border:none; border-radius:14px;
+            background: linear-gradient(135deg, var(--primary), #69a0ff); color:white; font-size:15px; font-weight:700;
+            cursor:pointer;
         }
-
-        /* Buton Tasarımı */
-        button {
-            width: 100%;
-            padding: 12px;
-            margin-top: 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff; /* BU RENGİ KULLANIYORUZ !!!! */
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.3s;
+        .demo-box, .error-box {
+            margin-top:22px; padding:14px 16px; border-radius:14px; font-size:14px; line-height:1.6;
+            border:1px solid rgba(255,255,255,.07);
         }
-
-        button:hover {
-            background-color: #0056b3; /* koyulaştuırıyor, bu güzel*/
-        }
-
-        /* Alt Bilgi Yazısı */
-        .info-text {
-            margin-top: 20px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
-        }
+        .demo-box { background: rgba(255,255,255,.05); color: var(--muted); }
+        .demo-box strong { color:#fff; }
+        .error-box { background: var(--danger-bg); color: var(--danger); border-color: rgba(255,93,115,.24);}
+        @media (max-width: 900px) { .login-shell { grid-template-columns:1fr; } .brand-panel { min-height:auto; } }
     </style>
 </head>
 <body>
-
-    <div class="login-card">
-        <h2>FASDA Demo Login</h2>
-
-        <form method="post">
-            <input name="username" type="text" placeholder="Username" required>
-            <input name="password" type="password" placeholder="Password" required>
-            <button type="submit">LOGIN</button>
-        </form>
-
-        <p class="info-text"><b>Demo credentials:</b> admin / admin</p>
+    <div class="login-shell">
+        <section class="brand-panel">
+            <div>
+                <div class="badge">FASDA • Secure Attendance Verification</div>
+                <h1>Detect forged signatures with role-based access.</h1>
+                <p>FASDA helps academic staff verify attendance signatures faster by combining signature analysis, bulk sheet processing, and benchmark visualizations in one dashboard.</p>
+            </div>
+            <div class="features">
+                <div class="feature"><strong>Admin Access</strong><span>Full access to verification, attendance analysis, plots, and benchmark tools.</span></div>
+                <div class="feature"><strong>User Access</strong><span>Access only the regular system modules without benchmark features.</span></div>
+                <div class="feature"><strong>Safer Interface</strong><span>Each user only sees the features they are allowed to use after login.</span></div>
+            </div>
+        </section>
+        <section class="login-card">
+            <h2>Welcome back</h2>
+            <p class="subtext">Sign in to access the FASDA dashboard and verification tools.</p>
+            <form method="post">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" type="text" placeholder="Enter your username" required>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="login-btn">Login to Dashboard</button>
+            </form>
+            {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
+            <div class="demo-box">
+                <strong>Demo credentials</strong><br>
+                Admin → Username: <strong>admin</strong> | Password: <strong>admin</strong><br>
+                User → Username: <strong>user</strong> | Password: <strong>user</strong>
+            </div>
+        </section>
     </div>
-
 </body>
 </html>
