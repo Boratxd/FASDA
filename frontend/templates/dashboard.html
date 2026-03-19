@@ -3,116 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FASDA Dashboard</title>
+    <title>FASDA | Dashboard</title>
     <style>
-        /* Temel Sayfa Ayarları */
+        :root {
+            --bg-1: #061120; --bg-2: #0f2343; --panel: rgba(9, 18, 34, 0.8); --panel-soft: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1); --text: #edf4ff; --muted: #9eb0d0; --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        }
+        * { box-sizing: border-box; }
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin:0; min-height:100vh; color:var(--text); font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(79, 140, 255, 0.16), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(57, 208, 164, 0.12), transparent 22%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            padding:28px;
+        }
+        .wrapper { max-width:1200px; margin:0 auto; }
+        .topbar {
+            background:var(--panel); border:1px solid var(--border); box-shadow:var(--shadow); backdrop-filter: blur(16px);
+            border-radius:24px; padding:24px 28px; display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:24px;
+        }
+        .title h1 { margin:0 0 6px; font-size:34px; }
+        .title p { margin:0; color:var(--muted); line-height:1.6; }
+        .status {
+            padding:12px 16px; border-radius:16px; background:rgba(57,208,164,.12); border:1px solid rgba(57,208,164,.22);
+            color:#d9fff3; font-size:14px; white-space:nowrap;
+        }
+        .overview { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:24px; }
+        .stat-card,.menu-card {
+            background:var(--panel); border:1px solid var(--border); border-radius:22px; box-shadow:var(--shadow); backdrop-filter: blur(16px);
+        }
+        .stat-card { padding:22px; }
+        .stat-label { color:var(--muted); font-size:14px; margin-bottom:10px; }
+        .stat-value { font-size:28px; font-weight:700; margin-bottom:8px; }
+        .stat-note { color:#cdd9ef; font-size:14px; line-height:1.5; }
+        .menu-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
 
-            /* Arka Plan */
-            background-image: url("{{ url_for('static', filename='images/what-is-signature.jpeg') }}");
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-
-            /* Ortalama */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .menu-card {
+            padding:24px; text-decoration:none; color:var(--text);
+            transition:transform .22s ease, border-color .22s ease, background .22s ease, opacity .22s ease;
+            display:block;
+        }
+        .menu-card:hover {
+            transform:translateY(-4px); border-color:rgba(79,140,255,.35); background:rgba(12,24,44,.92);
         }
 
-        /* Ana Kutu */
-        .dashboard-card {
-            background-color: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            width: 350px;
-            text-align: center;
-            color: white;
+        .menu-card .tag {
+            display:inline-block; margin-bottom:14px; padding:7px 12px; border-radius:999px; font-size:12px;
+            background:var(--panel-soft); border:1px solid rgba(255,255,255,.08); color:#dbe7ff;
+        }
+        .menu-card h3 { margin:0 0 10px; font-size:24px; }
+        .menu-card p { margin:0; color:var(--muted); line-height:1.7; }
+
+        .menu-card.disabled {
+            opacity: 0.55;
+            filter: grayscale(40%);
+            cursor: not-allowed;
+            pointer-events: none;
+            background: rgba(120, 120, 120, 0.16);
+            border-color: rgba(255,255,255,0.08);
         }
 
-        h2 {
-            margin-bottom: 30px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255,255,255,0.3);
-            padding-bottom: 15px;
+        .menu-card.disabled:hover {
+            transform: none;
+            border-color: rgba(255,255,255,0.08);
+            background: rgba(120, 120, 120, 0.16);
         }
 
-        /* Liste Stilini Sıfırlama */
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
+        .menu-card.disabled .tag {
+            background: rgba(255,255,255,0.06);
+            color: #c7cede;
         }
 
-        li {
-            margin-bottom: 15px;
+        .locked-note {
+            display: inline-block;
+            margin-top: 14px;
+            font-size: 12px;
+            color: #d6dbe8;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 6px 10px;
+            border-radius: 999px;
         }
 
-        /* Menü Butonları (Linkler) */
-        .menu-btn {
-            display: block; /* Tüm satırı kaplar */
-            padding: 15px;
-            background-color: rgba(255, 255, 255, 0.1); /* Hafif transparan */
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s ease; /* Yumuşak geçiş */
-        }
-
-        /* Butonun üzerine gelince */
-        .menu-btn:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px); /* Hafif yukarı kalkar */
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        /* Çıkış Butonu (Özel Stil) */
+        .footer-actions { margin-top:24px; display:flex; justify-content:flex-end; }
         .logout-btn {
-            background-color: rgba(220, 53, 69, 0.6); /* Kırmızımsı */
-            margin-top: 30px; /* Diğerlerinden ayır */
-            border: 1px solid rgba(220, 53, 69, 0.8);
+            display:inline-flex; align-items:center; justify-content:center; padding:14px 20px; border-radius:14px; background:rgba(255,93,115,.14);
+            color:#ffd7dd; text-decoration:none; border:1px solid rgba(255,93,115,.24); font-weight:600;
         }
-
-        .logout-btn:hover {
-            background-color: rgba(220, 53, 69, 0.9);
-            transform: translateY(-3px);
+        @media (max-width: 900px) {
+            .overview,.menu-grid { grid-template-columns:1fr; }
+            .topbar { flex-direction:column; align-items:flex-start; }
+            body { padding:18px; }
         }
-
     </style>
 </head>
 <body>
+    <div class="wrapper">
+        <section class="topbar">
+            <div class="title">
+                <h1>FASDA Dashboard</h1>
+                <p>Manage signature verification, attendance sheet analysis, and similarity visualizations from one central panel.</p>
+            </div>
+            <div class="status">Logged in as: <strong>{{ role|capitalize if role else 'User' }}</strong></div>
+        </section>
 
-    <div class="dashboard-card">
-        <h2>FASDA Dashboard</h2>
+        <section class="overview">
+            <div class="stat-card">
+                <div class="stat-label">Verification Module</div>
+                <div class="stat-value">Single Signature</div>
+                <div class="stat-note">Quickly compare one uploaded signature against the registered student reference.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Attendance Module</div>
+                <div class="stat-value">Batch PDF Review</div>
+                <div class="stat-note">Upload one attendance sheet and inspect per-row verification scores and labels.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Analytics Module</div>
+                <div class="stat-value">{% if role == 'admin' %}Plots & Benchmarks{% else %}Plots Only{% endif %}</div>
+                <div class="stat-note">{% if role == 'admin' %}Visualize model distributions and compare performance outputs in one place.{% else %}Visualize model distributions. Benchmark generation is restricted to admin users.{% endif %}</div>
+            </div>
+        </section>
 
-        <ul>
-            <li>
-                <a href="/verify" class="menu-btn">Verify Single Signature</a>
-            </li>
-            <li>
-                <a href="/plots" class="menu-btn">Plot Similarity Distributions</a>
-            </li>
-            <li>
-                <a href="/benchmark" class="menu-btn">Generate Benchmark Graphs</a>
-            </li>
+        <section class="menu-grid">
+            <a href="/verify" class="menu-card">
+                <span class="tag">Verification</span>
+                <h3>Verify Single Signature</h3>
+                <p>Upload one signature image, enter the student ID, and review CNN, HOG, and hybrid decision results.</p>
+            </a>
 
-            <li>
-                <a href="/logout" class="menu-btn logout-btn">Logout</a>
-            </li>
-        </ul>
+            <a href="/attendance" class="menu-card">
+                <span class="tag">Attendance</span>
+                <h3>Upload Attendance Sheet</h3>
+                <p>Submit a PDF attendance list and receive annotated attendance pages together with detected forgeries.</p>
+            </a>
+
+            <a href="/plots" class="menu-card">
+                <span class="tag">Visualization</span>
+                <h3>Similarity Distributions</h3>
+                <p>Inspect model score distributions for CNN, HOG, and hybrid matching strategies on a dedicated page.</p>
+            </a>
+
+            {% if role == 'admin' %}
+            <a href="/benchmark" class="menu-card">
+                <span class="tag">Benchmark</span>
+                <h3>Generate Benchmark Graphs</h3>
+                <p>Open benchmark outputs to present system performance and compare model-level evaluation metrics.</p>
+            </a>
+            {% else %}
+            <div class="menu-card disabled" aria-disabled="true" title="Only admins can access benchmark graphs">
+                <span class="tag">Benchmark</span>
+                <h3>Generate Benchmark Graphs</h3>
+                <p>Open benchmark outputs to present system performance and compare model-level evaluation metrics.</p>
+                <span class="locked-note">Admin only</span>
+            </div>
+            {% endif %}
+        </section>
+
+        <div class="footer-actions">
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
     </div>
-
 </body>
 </html>
