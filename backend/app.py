@@ -160,9 +160,6 @@ def attendance_flag():
             signature_key=data.get("signature_key", ""),
             student_id=data.get("student_id", ""),
             student_name=data.get("student_name", ""),
-            row_index=data.get("row_index"),
-            page_number=data.get("page_number"),
-            note=data.get("note", ""),
             source_pdf=data.get("source_pdf", "")
         )
 

@@ -1,12 +1,12 @@
 import os
 import random
-import sqlite3
+import psycopg2
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from config import DB_PATH, MODEL_PATH, DATASET_PATH
+from config import MODEL_PATH, DATASET_PATH, PG_HOST, PG_PORT, PG_DATABASE, PG_USER, PG_PASSWORD
 from ml.cnn_model import L1DistanceLayer
 from ml.dataset_utils import extract_user_signatures
 from ml.verification import verify_signature
@@ -54,7 +54,10 @@ def plot_similarity_distributions():
     if os.path.exists(cnn_path) and os.path.exists(hog_path) and os.path.exists(hyb_path):
         return
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = psycopg2.connect(
+        host=PG_HOST, port=PG_PORT, database=PG_DATABASE,
+        user=PG_USER, password=PG_PASSWORD
+    )
     c = conn.cursor()
 
     c.execute("""
@@ -62,6 +65,7 @@ def plot_similarity_distributions():
         FROM verification_logs
     """)
     rows = c.fetchall()
+    c.close()
     conn.close()
 
     cnn_g, cnn_i = [], []

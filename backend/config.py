@@ -13,12 +13,14 @@ MODEL_PATH = os.path.join(
     "gpds_siamese_modelv4.h5"
 )
 
-# SQLite DB location:
-DB_PATH = os.path.join(
-    BASE_DIR,
-    "data",
-    "fasda_results.db"
-)
+# PostgreSQL connection settings (AWS RDS)
+PG_HOST = "fasda-db.c9acs4wi65jb.eu-north-1.rds.amazonaws.com"
+PG_PORT = 5432
+PG_DATABASE = "fasda"
+PG_USER = "fasdaPostgres"
+PG_PASSWORD = "fasda2526"
+
+DATABASE_URL = f"postgresql://{PG_USER}:{PG_PASSWORD}@{PG_HOST}:{PG_PORT}/{PG_DATABASE}"
 
 IMG_SIZE = (128, 128)
 
