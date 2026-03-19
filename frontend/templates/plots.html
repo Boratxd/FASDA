@@ -3,116 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Similarity Distributions</title>
-
+    <title>FASDA | Similarity Distributions</title>
     <style>
-        /* Temel Sayfa Ayarları */
+        :root {
+            --bg-1: #07111f;
+            --bg-2: #0f2343;
+            --panel: rgba(9, 18, 34, 0.82);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #edf4ff;
+            --muted: #9fb1d2;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
-            padding: 0;
-            min-height: 100vh; /* En az ekran boyu kadar */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 28px;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(79, 140, 255, 0.16), transparent 25%),
+                radial-gradient(circle at bottom right, rgba(57, 208, 164, 0.12), transparent 22%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+        }
 
-            /* Arka Plan Ayarları */
-            background-image: url("{{ url_for('static', filename='images/what-is-signature.jpeg') }}");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed; /* Sayfa kaydırılsa da arka plan sabit kalır */
-            background-repeat: no-repeat;
+        .wrapper {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: grid;
+            gap: 24px;
+        }
 
-            /* İçeriği ortalamak için Flexbox */
+        .hero,
+        .plot-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .hero {
+            padding: 28px 30px;
             display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Uzun içerik olduğu için yukarıdan başlatıyoruz */
-            padding-top: 50px;
-            padding-bottom: 50px;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        /* Ana İçerik Kartı */
-        .container {
-            background-color: rgba(255, 255, 255, 0.15); /* Yarı saydam */
-            backdrop-filter: blur(10px); /* Buzlu cam */
-            padding: 50px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-
-            width: 80%; /* Ekranın %80'ini kaplasın */
-            max-width: 900px; /* Ama çok da genişlemesin */
-            text-align: center;
-            color: white;
+        .hero h1 {
+            margin: 0 0 8px;
+            font-size: 34px;
         }
 
-        /* Başlıklar */
-        h2 {
-            margin-bottom: 40px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid rgba(255,255,255,0.3);
-            padding-bottom: 20px;
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+            max-width: 760px;
         }
 
-        h3 {
-            margin-top: 50px;
-            margin-bottom: 20px;
-            color: #e0e0e0;
-        }
-
-        /* Görseller (Grafikler) */
-        img {
-            max-width: 100%; /* Mobilde taşmayı engeller */
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* Grafiğe derinlik katar */
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: transform 0.3s ease;
-        }
-
-        img:hover {
-            transform: scale(1.02); /* Üzerine gelince hafif büyür */
-        }
-
-        /* "Back to Dashboard" Butonu */
         .back-btn {
-            display: inline-block;
-            margin-top: 50px;
-            padding: 12px 30px;
-            background-color: #007bff; /* Login butonuyla aynı mavi */
-            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             text-decoration: none;
-            border-radius: 30px;
-            font-weight: bold;
-            transition: background-color 0.3s, transform 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #dbe7ff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-weight: 700;
+            transition: transform 0.2s ease;
+            white-space: nowrap;
         }
 
-        .back-btn:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
+        .back-btn:hover { transform: translateY(-2px); }
+
+        .plot-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
         }
 
+        .plot-card {
+            padding: 24px;
+        }
+
+        .plot-card h2 {
+            margin: 0 0 10px;
+            font-size: 24px;
+        }
+
+        .plot-card p {
+            margin: 0 0 18px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .plot-card img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        @media (max-width: 720px) {
+            body { padding: 18px; }
+            .hero h1 { font-size: 28px; }
+        }
     </style>
 </head>
-
 <body>
+    <div class="wrapper">
+        <section class="hero">
+            <div>
+                <h1>Similarity Distribution Graphs</h1>
+                <p>
+                    Compare score behavior across CNN, HOG, and hybrid methods to better understand how
+                    the verification system separates genuine and forged signatures.
+                </p>
+            </div>
+            <a href="{{ url_for('dashboard') }}" class="back-btn">← Back to Dashboard</a>
+        </section>
 
-    <div class="container">
-        <h2>Similarity Distribution Graphs</h2>
+        <section class="plot-grid">
+            <article class="plot-card">
+                <h2>CNN Similarity</h2>
+                <p>CNN-based similarity distribution for the uploaded or benchmarked signature comparisons.</p>
+                <img src="{{ url_for('static', filename='plots/cnn_distribution.png') }}" alt="CNN Distribution">
+            </article>
 
-        <h3>CNN Similarity</h3>
-        <img src="{{ url_for('static', filename='plots/cnn_distribution.png') }}" alt="CNN Distribution">
+            <article class="plot-card">
+                <h2>HOG Similarity</h2>
+                <p>Histogram of Gradient-based similarity values produced by the handcrafted feature pipeline.</p>
+                <img src="{{ url_for('static', filename='plots/hog_distribution.png') }}" alt="HOG Distribution">
+            </article>
 
-        <h3>HOG Similarity</h3>
-        <img src="{{ url_for('static', filename='plots/hog_distribution.png') }}" alt="HOG Distribution">
-
-        <h3>Hybrid Similarity</h3>
-        <img src="{{ url_for('static', filename='plots/hybrid_distribution.png') }}" alt="Hybrid Distribution">
-
-        <br>
-
-        <a href="{{ url_for('dashboard') }}" class="back-btn">← Back to Dashboard</a>
+            <article class="plot-card">
+                <h2>Hybrid Similarity</h2>
+                <p>Combined similarity output showing the final score distribution used in the hybrid decision stage.</p>
+                <img src="{{ url_for('static', filename='plots/hybrid_distribution.png') }}" alt="Hybrid Distribution">
+            </article>
+        </section>
     </div>
-
 </body>
 </html>
