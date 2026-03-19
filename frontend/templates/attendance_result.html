@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FASDA | Attendance Results</title>
+    <style>
+        :root {
+            --bg-1: #061120;
+            --bg-2: #0f2343;
+            --panel: rgba(9, 18, 34, 0.86);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #edf4ff;
+            --muted: #9eb0d0;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(79, 140, 255, 0.16), transparent 24%),
+                radial-gradient(circle at bottom right, rgba(57, 208, 164, 0.12), transparent 22%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            padding: 28px;
+        }
+
+        .wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .topbar {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            border-radius: 24px;
+            padding: 24px 28px;
+            margin-bottom: 24px;
+        }
+
+        .topbar h1 {
+            margin: 0 0 8px;
+            font-size: 34px;
+        }
+
+        .topbar p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .page-block {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .page-block h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+
+        .page-block img {
+            max-width: 100%;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .table-panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+            padding: 22px;
+            overflow-x: auto;
+        }
+
+        .table-panel h3 {
+            margin-top: 0;
+            margin-bottom: 18px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+
+        th, td {
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding: 12px 10px;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        th {
+            background: rgba(255,255,255,0.06);
+            color: #dbe7ff;
+            font-size: 14px;
+        }
+
+        td {
+            background: rgba(255,255,255,0.02);
+            color: var(--text);
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.04);
+        }
+
+        .forged {
+            color: #ff8c8c;
+            font-weight: 700;
+        }
+
+        .genuine {
+            color: #7ff0b0;
+            font-weight: 700;
+        }
+
+        .unknown {
+            color: #ffd166;
+            font-weight: 700;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .btn.flag {
+            color: white;
+            background: linear-gradient(90deg, #f59e0b, #f97316);
+        }
+
+        .btn.flag:hover {
+            transform: translateY(-1px);
+            opacity: 0.95;
+        }
+
+        .btn.flag.flagged {
+            background: linear-gradient(90deg, #16a34a, #22c55e);
+        }
+
+        .btn.flag.loading {
+            opacity: 0.8;
+            cursor: wait;
+        }
+
+        .flag-id {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #c7d2e8;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 22px;
+            text-decoration: none;
+            color: #dbe7ff;
+            background: rgba(255,255,255,0.08);
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .back:hover {
+            background: rgba(255,255,255,0.12);
+        }
+
+        @media (max-width: 900px) {
+            body { padding: 18px; }
+            .topbar h1 { font-size: 28px; }
+            table { font-size: 12px; }
+            th, td { padding: 10px 8px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <section class="topbar">
+            <h1>Forgery Detection Results</h1>
+            <p>Review annotated attendance pages, inspect similarity scores, and toggle flagged signatures when needed.</p>
+        </section>
+
+        {% if pages %}
+            {% for page_path in pages %}
+                <div class="page-block">
+                    <h3>Annotated Attendance Page {{ loop.index }}</h3>
+                    <img src="{{ page_path }}" alt="Attendance Page {{ loop.index }}">
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <section class="table-panel">
+            <h3>Signature Scores</h3>
+
+            <table>
+                <tr>
+                    <th>Page</th>
+                    <th>Row</th>
+                    <th>Student ID</th>
+                    <th>CNN</th>
+                    <th>HOG</th>
+                    <th>Hybrid</th>
+                    <th>Decision</th>
+                    <th>Flag</th>
+                </tr>
+
+                {% for r in results %}
+                    {% set page_value = r.page if r.page is defined and r.page not in [None, ''] else (r.page_number if r.page_number is defined else '-') %}
+                    {% set row_value = r.row if r.row is defined and r.row not in [None, ''] else (r.row_index if r.row_index is defined else '-') %}
+                    {% set student_id_value = r.student_id if r.student_id is defined and r.student_id not in [None, ''] else '-' %}
+                    {% set cnn_value = r.cnn if r.cnn is defined and r.cnn not in [None, ''] else '-' %}
+                    {% set hog_value = r.hog if r.hog is defined and r.hog not in [None, ''] else '-' %}
+                    {% set hybrid_value = r.hybrid if r.hybrid is defined and r.hybrid not in [None, ''] else '-' %}
+                    {% set decision_value = r.label if r.label is defined and r.label not in [None, ''] else (r.decision if r.decision is defined and r.decision not in [None, ''] else 'UNKNOWN') %}
+
+                    {% set signature_key = r.signature_key if r.signature_key is defined and r.signature_key not in [None, ''] else (page_value|string ~ '_' ~ row_value|string ~ '_' ~ student_id_value|string) %}
+                    {% set composite_key = source_pdf ~ '::' ~ signature_key %}
+                    {% set existing_flag = flagged_map.get(composite_key) %}
+
+                    <tr>
+                        <td>{{ page_value }}</td>
+                        <td>{{ row_value }}</td>
+                        <td>{{ student_id_value }}</td>
+                        <td>{{ cnn_value }}</td>
+                        <td>{{ hog_value }}</td>
+                        <td>{{ hybrid_value }}</td>
+                        <td class="{% if decision_value == 'FORGED' %}forged{% elif decision_value == 'GENUINE' %}genuine{% else %}unknown{% endif %}">
+                            {{ decision_value }}
+                        </td>
+                        <td>
+                            <button
+                                type="button"
+                                class="btn flag {% if existing_flag %}flagged{% endif %}"
+                                id="flag-btn-{{ loop.index0 }}"
+                                onclick="toggleFlagRow(
+                                    '{{ signature_key|e }}',
+                                    '{{ student_id_value|e }}',
+                                    '',
+                                    '{{ row_value }}',
+                                    '{{ page_value }}',
+                                    '{{ source_pdf if source_pdf else '' }}',
+                                    'flag-btn-{{ loop.index0 }}',
+                                    'flag-id-{{ loop.index0 }}'
+                                )"
+                            >
+                                {% if existing_flag %}Flagged{% else %}⚑ Flag{% endif %}
+                            </button>
+
+                            <div class="flag-id" id="flag-id-{{ loop.index0 }}">
+                                {% if existing_flag %}{{ existing_flag }}{% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+            <a class="back" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
+        </section>
+    </div>
+
+    <script>
+        async function toggleFlagRow(signatureKey, studentId, studentName, rowIndex, pageNumber, sourcePdf, btnId, flagIdId) {
+            const btn = document.getElementById(btnId);
+            const flagIdBox = document.getElementById(flagIdId);
+
+            if (!btn || btn.classList.contains("loading")) return;
+
+            const oldText = btn.innerText;
+            btn.classList.add("loading");
+            btn.innerText = "Processing...";
+
+            try {
+                const response = await fetch("/attendance/flag", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        signature_key: signatureKey,
+                        student_id: studentId,
+                        student_name: studentName,
+                        row_index: rowIndex,
+                        page_number: pageNumber,
+                        source_pdf: sourcePdf,
+                        note: ""
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    if (data.action === "flagged") {
+                        btn.classList.add("flagged");
+                        btn.innerText = "Flagged";
+                        if (flagIdBox) flagIdBox.innerText = data.flag_id || "";
+                    } else if (data.action === "unflagged") {
+                        btn.classList.remove("flagged");
+                        btn.innerText = "⚑ Flag";
+                        if (flagIdBox) flagIdBox.innerText = "";
+                    } else {
+                        btn.innerText = oldText;
+                        alert("Unknown flag response.");
+                    }
+                } else {
+                    btn.innerText = oldText;
+                    alert(data.error || "Flag action failed.");
+                }
+            } catch (err) {
+                btn.innerText = oldText;
+                alert("Network error while changing flag state.");
+            } finally {
+                btn.classList.remove("loading");
+            }
+        }
+    </script>
+</body>
+</html>
