@@ -1,4 +1,6 @@
 import os
+import psycopg2
+import psycopg2.extras
 import tensorflow as tf
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 from werkzeug.utils import secure_filename
@@ -9,6 +11,7 @@ from ml.verification import verify_signature
 from ml.evaluation import plot_similarity_distributions, evaluate_distributions
 from ml.custom_layers import L1DistanceLayer
 from ml.analyzer import analyze_and_annotate
+from config import PG_HOST, PG_PORT, PG_DATABASE, PG_USER, PG_PASSWORD
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))
@@ -33,10 +36,11 @@ app = Flask(
 app.secret_key = "fasda_demo_secret"
 app.config["UPLOAD_FOLDER"] = VERIFY_UPLOAD_FOLDER
 
-USERS = {
-    "admin": {"password": "admin", "role": "admin"},
-    "user": {"password": "user", "role": "user"},
-}
+def get_db():
+    return psycopg2.connect(
+        host=PG_HOST, port=PG_PORT, database=PG_DATABASE,
+        user=PG_USER, password=PG_PASSWORD
+    )
 
 model = tf.keras.models.load_model(
     MODEL_PATH,
@@ -86,8 +90,14 @@ def login():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
 
-        user = USERS.get(username)
-        if user and user["password"] == password:
+        conn = get_db()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("SELECT * FROM users WHERE username = %s AND password = %s", (username, password))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if user:
             session["logged_in"] = True
             session["username"] = username
             session["role"] = user["role"]
@@ -104,7 +114,9 @@ def register():
         username = request.form.get("username", "").strip()
         password = request.form.get("password", "").strip()
         confirm_password = request.form.get("confirm_password", "").strip()
-        role = request.form.get("role", "user").strip()
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
+        phone = request.form.get("phone", "").strip()
 
         if not username or not password:
             return render_template("register.html", error="Username and password are required.")
@@ -112,13 +124,22 @@ def register():
         if password != confirm_password:
             return render_template("register.html", error="Passwords do not match.")
 
-        if username in USERS:
+        conn = get_db()
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM users WHERE username = %s", (username,))
+        if cur.fetchone():
+            cur.close()
+            conn.close()
             return render_template("register.html", error="Username already exists.")
 
-        if role not in ("admin", "user"):
-            role = "user"
+        cur.execute("""
+            INSERT INTO users (username, password, first_name, last_name, phone, role)
+            VALUES (%s, %s, %s, %s, %s, 'user')
+        """, (username, password, first_name, last_name, phone))
+        conn.commit()
+        cur.close()
+        conn.close()
 
-        USERS[username] = {"password": password, "role": role}
         return render_template("register.html", success="Account created successfully! You can now sign in.")
 
     return render_template("register.html")
