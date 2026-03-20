@@ -98,6 +98,32 @@ def login():
     return render_template("login.html")
 
 
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
+        confirm_password = request.form.get("confirm_password", "").strip()
+        role = request.form.get("role", "user").strip()
+
+        if not username or not password:
+            return render_template("register.html", error="Username and password are required.")
+
+        if password != confirm_password:
+            return render_template("register.html", error="Passwords do not match.")
+
+        if username in USERS:
+            return render_template("register.html", error="Username already exists.")
+
+        if role not in ("admin", "user"):
+            role = "user"
+
+        USERS[username] = {"password": password, "role": role}
+        return render_template("register.html", success="Account created successfully! You can now sign in.")
+
+    return render_template("register.html")
+
+
 @app.route("/dashboard")
 def dashboard():
     if not session.get("logged_in"):

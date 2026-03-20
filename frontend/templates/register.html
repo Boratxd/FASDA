@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FASDA | Register</title>
+    <style>
+        :root {
+            --bg-1: #07111f; --bg-2: #0f1f38; --card: rgba(9, 18, 34, 0.78);
+            --border: rgba(255, 255, 255, 0.12); --text: #eef4ff; --muted: #a8b6d3;
+            --primary: #4f8cff; --primary-hover: #3d79eb; --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+            --radius: 22px; --danger: #ff9aae; --danger-bg: rgba(255,93,115,.12);
+            --success: #6ee7b7; --success-bg: rgba(110,231,183,.12);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh; font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(79, 140, 255, 0.18), transparent 28%),
+                radial-gradient(circle at bottom right, rgba(71, 214, 193, 0.16), transparent 24%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+            display: grid; place-items: center; padding: 24px;
+        }
+        .register-shell { width: 100%; max-width: 980px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; }
+        .brand-panel, .register-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+            backdrop-filter: blur(16px); box-shadow: var(--shadow);
+        }
+        .brand-panel { padding: 42px; display:flex; flex-direction:column; justify-content:space-between; min-height:620px; }
+        .badge {
+            width: fit-content; padding: 8px 14px; border-radius: 999px; font-size: 13px; letter-spacing: .4px;
+            color: #d7e4ff; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .brand-panel h1 { margin:20px 0 12px; font-size: clamp(34px, 5vw, 52px); line-height:1.05; }
+        .brand-panel p { margin:0; max-width:520px; color:var(--muted); line-height:1.75; font-size:16px; }
+        .features { display:grid; gap:14px; margin-top:30px; }
+        .feature { padding:16px 18px; border-radius:16px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.07);}
+        .feature strong { display:block; margin-bottom:6px; font-size:15px; }
+        .feature span { color:var(--muted); font-size:14px; line-height:1.6; }
+        .register-card { padding:36px; display:flex; flex-direction:column; justify-content:center; }
+        .register-card h2 { margin:0 0 8px; font-size:30px; }
+        .register-card .subtext { margin:0 0 28px; color:var(--muted); line-height:1.6; }
+        .field { margin-bottom:16px; }
+        .field label { display:block; margin-bottom:8px; font-size:14px; color:#dce7ff; }
+        .field input, .field select {
+            width:100%; padding:15px 16px; border-radius:14px; border:1px solid rgba(255,255,255,.1);
+            background:rgba(255,255,255,.06); color:var(--text); font-size:15px; outline:none;
+        }
+        .field input::placeholder { color:#96a7ca; }
+        .field select option { background: #0f1f38; color: var(--text); }
+        .register-btn {
+            width:100%; margin-top:10px; padding:15px 18px; border:none; border-radius:14px;
+            background: linear-gradient(135deg, var(--primary), #69a0ff); color:white; font-size:15px; font-weight:700;
+            cursor:pointer;
+        }
+        .register-btn:hover { background: linear-gradient(135deg, var(--primary-hover), var(--primary)); }
+        .error-box, .success-box {
+            margin-top:22px; padding:14px 16px; border-radius:14px; font-size:14px; line-height:1.6;
+            border:1px solid rgba(255,255,255,.07);
+        }
+        .error-box { background: var(--danger-bg); color: var(--danger); border-color: rgba(255,93,115,.24); }
+        .success-box { background: var(--success-bg); color: var(--success); border-color: rgba(110,231,183,.24); }
+        .login-link {
+            margin-top:18px; text-align:center; font-size:14px; color:var(--muted);
+        }
+        .login-link a { color:var(--primary); text-decoration:none; font-weight:600; }
+        .login-link a:hover { text-decoration:underline; }
+        @media (max-width: 900px) { .register-shell { grid-template-columns:1fr; } .brand-panel { min-height:auto; } }
+    </style>
+</head>
+<body>
+    <div class="register-shell">
+        <section class="brand-panel">
+            <div>
+                <div class="badge">FASDA • Secure Attendance Verification</div>
+                <h1>Create your account to get started.</h1>
+                <p>Register to access the FASDA dashboard. After registration, you can log in and start verifying attendance signatures.</p>
+            </div>
+            <div class="features">
+                <div class="feature"><strong>Quick Setup</strong><span>Create your account in seconds and start using the platform immediately.</span></div>
+                <div class="feature"><strong>Role-Based Access</strong><span>Choose your role during registration. Admins get full access, users get standard modules.</span></div>
+                <div class="feature"><strong>Secure Platform</strong><span>Your credentials are stored securely within the system.</span></div>
+            </div>
+        </section>
+        <section class="register-card">
+            <h2>Create Account</h2>
+            <p class="subtext">Fill in the details below to register a new account.</p>
+            <form method="post">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" type="text" placeholder="Choose a username" required>
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" placeholder="Choose a password" required>
+                </div>
+                <div class="field">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input id="confirm_password" name="confirm_password" type="password" placeholder="Confirm your password" required>
+                </div>
+                <div class="field">
+                    <label for="role">Role</label>
+                    <select id="role" name="role">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit" class="register-btn">Create Account</button>
+            </form>
+            {% if error %}<div class="error-box">{{ error }}</div>{% endif %}
+            {% if success %}<div class="success-box">{{ success }}</div>{% endif %}
+            <div class="login-link">
+                Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
