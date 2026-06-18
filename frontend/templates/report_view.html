@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FASDA | {{ report.course }} Report</title>
+    <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+    <link rel="stylesheet" href="/static/fasda.css">
+    <link rel="stylesheet" href="/static/theme.css">
+    <style>
+        .meta-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 20px 24px;
+            display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+        }
+        .meta-pill {
+            display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+            border-radius: 999px; font-size: 12px; font-weight: 600;
+        }
+        .pill-course  { background: var(--violet-dim);  border: 1px solid var(--violet-border);  color: var(--violet); }
+        .pill-genuine { background: var(--emerald-dim); border: 1px solid var(--emerald-border); color: var(--emerald); }
+        .pill-forged  { background: var(--rose-dim);    border: 1px solid var(--rose-border);    color: var(--rose); }
+        .pill-total   { background: var(--surface-2);   border: 1px solid var(--border);         color: var(--text-muted); }
+        .meta-date    { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+        .chart-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+        }
+        .chart-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 22px;
+        }
+        .chart-card h3 { margin: 0 0 14px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+        .chart-card canvas { max-height: 240px; }
+
+        .table-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 24px; overflow-x: auto;
+        }
+        .table-card h3 { margin: 0 0 16px; font-size: 17px; font-weight: 700; color: var(--text); }
+        .table-card table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .table-card th, .table-card td { padding: 11px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+        .table-card th { background: var(--surface-2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .table-card tr:last-child td { border-bottom: none; }
+        .table-card tr:hover td { background: var(--surface-2); }
+        .table-card td { color: var(--text); }
+
+        .print-btn {
+            display: inline-flex; align-items: center; padding: 10px 16px; border-radius: var(--radius);
+            background: var(--violet-dim); border: 1px solid var(--violet-border);
+            color: var(--violet); font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .print-btn:hover { transform: translateY(-1px); background: rgba(139,92,246,0.22); }
+
+        @media print {
+            body { background: white; color: black; padding: 0; }
+            .sidebar, .mobile-header, .page-header { display: none !important; }
+            .app-main { margin-left: 0 !important; }
+            .chart-card, .table-card, .meta-card { border: 1px solid #ccc; box-shadow: none; }
+        }
+
+        @media (max-width: 700px) {
+            .chart-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<header class="mobile-header">
+    <div class="sb-logo">
+        <div class="sb-logo-mark" style="width:28px;height:28px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <span class="sb-logo-text">FASDA</span>
+    </div>
+    <button id="hamburger" class="hamburger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+</header>
+
+<div class="app-shell">
+    <nav class="sidebar">
+        <div class="sb-header">
+            <div class="sb-logo">
+                <div class="sb-logo-mark">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <span class="sb-logo-text">FASDA</span>
+            </div>
+        </div>
+        <div class="sb-nav">
+            <a href="/dashboard" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </a>
+            {% if role != 'admin' %}
+            <a href="/verify" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Verify Signature
+            </a>
+            <a href="/attendance" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Attendance
+            </a>
+            {% endif %}
+            {% if role == 'admin' %}
+            <div class="sb-divider"></div>
+            <a href="/admin" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Admin Panel
+            </a>
+            <a href="/plots" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Distribution Plots
+            </a>
+            <a href="/benchmark" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Benchmark
+            </a>
+            {% endif %}
+        </div>
+        <div class="sb-footer">
+            <a href="/profile" class="sb-user">
+                <div class="sb-avatar {% if role == 'admin' %}admin{% endif %}">{{ (display_name or 'U')[0]|upper }}</div>
+                <div>
+                    <div class="sb-user-name">{{ display_name }}</div>
+                    <div class="sb-user-role">{{ 'Administrator' if role == 'admin' else 'User' }}</div>
+                </div>
+            </a>
+            <a href="/logout" class="sb-logout" title="Logout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </a>
+        </div>
+    </nav>
+
+    <main class="app-main">
+        <div class="page-header anim-down">
+            <div>
+                <div class="page-title">{{ report.course }} — Report</div>
+                <div class="page-desc">
+                    Saved on {{ report.created_at[:10] if report.created_at else 'Unknown date' }}
+                    {% if report.created_by %} by {{ report.created_by }}{% endif %}
+                    {% if report.source_pdf %} · PDF: {{ report.source_pdf }}{% endif %}
+                </div>
+            </div>
+            <div class="page-actions">
+                <button class="print-btn" onclick="window.print()">Print</button>
+                <a href="/reports/{{ report.slug }}" class="btn btn-ghost btn-sm">← All Reports</a>
+            </div>
+        </div>
+
+        
+        <div class="meta-card anim-up">
+            <span class="meta-pill pill-course">📁 {{ report.course }}</span>
+            {% if report.summary %}
+                {% if report.summary.total is defined %}
+                <span class="meta-pill pill-total">{{ report.summary.total }} signatures</span>
+                {% endif %}
+                {% if report.summary.genuine is defined %}
+                <span class="meta-pill pill-genuine">{{ report.summary.genuine }} genuine</span>
+                {% endif %}
+                {% if report.summary.forged is defined %}
+                <span class="meta-pill pill-forged">{{ report.summary.forged }} forged</span>
+                {% endif %}
+            {% endif %}
+            <span class="meta-date">{{ report.created_at[:16].replace('T', ' ') if report.created_at else '' }}</span>
+        </div>
+
+        
+        <div class="chart-grid anim-up" style="animation-delay:0.06s;">
+            <div class="chart-card">
+                <h3>Overall Distribution</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Genuine vs Forged per Student</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+
+        
+        <div class="table-card anim-up" style="animation-delay:0.1s;">
+            <h3>Students — worst forgery rate first</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student ID</th>
+                        <th>Total</th>
+                        <th>Genuine</th>
+                        <th>Forged</th>
+                        <th>Forgery Rate</th>
+                        <th>Visual</th>
+                    </tr>
+                </thead>
+                <tbody id="studentTableBody"></tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const rawResults = {{ results_json | safe }};
+
+    const students = {};
+    for (const r of rawResults) {
+        const sid = ((r.student_id || '') + '').trim() || 'Unknown';
+        if (!students[sid]) students[sid] = { genuine: 0, forged: 0, unknown: 0 };
+        const dec = ((r.label || r.decision || 'UNKNOWN') + '').toUpperCase();
+        if (dec === 'GENUINE')     { students[sid].genuine++; }
+        else if (dec === 'FORGED') { students[sid].forged++; }
+        else                       { students[sid].unknown++; }
+    }
+    const sorted = Object.entries(students).sort((a, b) => {
+        const ta = a[1].genuine + a[1].forged + a[1].unknown;
+        const tb = b[1].genuine + b[1].forged + b[1].unknown;
+        return (tb > 0 ? b[1].forged / tb : 0) - (ta > 0 ? a[1].forged / ta : 0);
+    });
+
+    let tG = 0, tF = 0, tU = 0;
+    Object.values(students).forEach(v => { tG += v.genuine; tF += v.forged; tU += v.unknown; });
+
+    new Chart(document.getElementById('pieChart').getContext('2d'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Genuine', 'Forged', 'Unknown'],
+            datasets: [{ data: [tG, tF, tU],
+                backgroundColor: ['rgba(16,185,129,0.75)','rgba(244,63,94,0.75)','rgba(245,158,11,0.7)'],
+                borderColor: ['#10b981','#f43f5e','#f59e0b'], borderWidth: 2 }]
+        },
+        options: { plugins: { legend: { labels: { color: '#e2eaf8', font: { size: 12 } } } }, cutout: '60%' }
+    });
+
+    new Chart(document.getElementById('barChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: sorted.map(([s]) => 'ID ' + s),
+            datasets: [
+                { label: 'Genuine', data: sorted.map(([,v]) => v.genuine), backgroundColor: 'rgba(16,185,129,0.7)', borderColor: '#10b981', borderWidth: 1 },
+                { label: 'Forged',  data: sorted.map(([,v]) => v.forged),  backgroundColor: 'rgba(244,63,94,0.7)', borderColor: '#f43f5e',  borderWidth: 1 }
+            ]
+        },
+        options: {
+            plugins: { legend: { labels: { color: '#e2eaf8', font: { size: 12 } } } },
+            scales: {
+                x: { ticks: { color: '#6b7a9a', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                y: { ticks: { color: '#6b7a9a' }, grid: { color: 'rgba(255,255,255,0.07)' }, beginAtZero: true }
+            }
+        }
+    });
+
+    const tbody = document.getElementById('studentTableBody');
+    sorted.forEach(([sid, v], i) => {
+        const total = v.genuine + v.forged + v.unknown;
+        const pct = total > 0 ? (v.forged / total * 100) : 0;
+        const pctColor = pct >= 50 ? '#f43f5e' : pct >= 20 ? '#f59e0b' : '#10b981';
+        const td = 'padding:11px 12px;border-bottom:1px solid rgba(255,255,255,0.06);color:var(--text);';
+        tbody.innerHTML += `<tr>
+            <td style="${td}color:var(--text-muted)">${i + 1}</td>
+            <td style="${td}"><strong>${sid}</strong></td>
+            <td style="${td}">${total}</td>
+            <td style="${td}color:#10b981">${v.genuine}</td>
+            <td style="${td}color:#f43f5e">${v.forged}</td>
+            <td style="${td}font-weight:700;color:${pctColor}">${pct.toFixed(1)}%</td>
+            <td style="${td}">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <div style="flex:1;min-width:80px;height:6px;border-radius:3px;background:rgba(255,255,255,0.07);overflow:hidden;">
+                        <div style="height:100%;border-radius:3px;background:${pctColor};width:${pct}%"></div>
+                    </div>
+                </div>
+            </td>
+        </tr>`;
+    });
+</script>
+
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150;" class=""></div>
+<button id="theme-toggle" onclick="_fasdaToggleTheme()" title="Toggle theme">☀️</button>
+<script src="/static/theme.js"></script>
+</body>
+</html>

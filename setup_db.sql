@@ -13,12 +13,20 @@ CREATE TABLE IF NOT EXISTS verification_logs (
 -- 2. users tablosu
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100) NOT NULL DEFAULT '',
+    last_name VARCHAR(100) NOT NULL DEFAULT '',
     phone VARCHAR(20),
+    role VARCHAR(20) DEFAULT 'user',
+    approved BOOLEAN DEFAULT FALSE,
     payment_status VARCHAR(20) DEFAULT 'unpaid',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migration: add approved column to existing tables
+ALTER TABLE users ADD COLUMN IF NOT EXISTS approved BOOLEAN DEFAULT FALSE;
+UPDATE users SET approved = TRUE WHERE role = 'admin';
 
 -- 3. flagged_students tablosu
 CREATE TABLE IF NOT EXISTS flagged_students (

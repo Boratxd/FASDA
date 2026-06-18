@@ -4,39 +4,35 @@ import tensorflow as tf
 from tensorflow.keras import layers, Model
 from config import IMG_SIZE
 
-# =========================================================
-# SAFE DISTANCE LAYER
-# =========================================================
 class L1DistanceLayer(layers.Layer):
     def call(self, inputs):
         x, y = inputs
         return tf.abs(x - y)
 
-# =========================================================
-# IMAGE PREPROCESSING (CNN)
-# =========================================================
 def load_image(path):
+
     img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     if img is None:
         raise ValueError(f"Cannot read image: {path}")
 
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    img = clahe.apply(img)
+
     img = cv2.resize(img, IMG_SIZE)
+
     img = cv2.adaptiveThreshold(
         img, 255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY_INV, 15, 3
+        cv2.THRESH_BINARY_INV, 25, 8
     )
     img = cv2.morphologyEx(
         img,
         cv2.MORPH_OPEN,
-        cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
     )
     img = img / 255.0
     return img.reshape(128, 128, 1)
 
-# =========================================================
-# SIAMESE CNN
-# =========================================================
 def build_feature_extractor():
     inp = layers.Input((128,128,1))
     x = layers.Conv2D(64,3,activation="relu")(inp)

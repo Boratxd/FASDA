@@ -4,305 +4,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FASDA | Verify Signature</title>
+    <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+    <link rel="stylesheet" href="/static/fasda.css">
+    <link rel="stylesheet" href="/static/theme.css">
     <style>
-        :root {
-            --bg-1: #07111f;
-            --bg-2: #0f2343;
-            --card: rgba(9, 18, 34, 0.8);
-            --border: rgba(255, 255, 255, 0.1);
-            --text: #edf4ff;
-            --muted: #9fb1d2;
-            --primary: #4f8cff;
-            --primary-hover: #3c79eb;
-            --success-bg: rgba(57, 208, 164, 0.12);
-            --success-border: rgba(57, 208, 164, 0.22);
-            --danger-bg: rgba(255, 93, 115, 0.12);
-            --danger-border: rgba(255, 93, 115, 0.24);
-            --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            padding: 28px;
-            color: var(--text);
-            font-family: Inter, "Segoe UI", Arial, sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(79, 140, 255, 0.16), transparent 25%),
-                radial-gradient(circle at bottom right, rgba(57, 208, 164, 0.12), transparent 22%),
-                linear-gradient(135deg, var(--bg-1), var(--bg-2));
+        .verify-layout {
             display: grid;
-            place-items: center;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            align-items: start;
         }
-
-        .page {
-            width: 100%;
-            max-width: 1080px;
-            display: grid;
-            grid-template-columns: 1.05fr 0.95fr;
-            gap: 24px;
+        .upload-area {
+            border: 1px dashed var(--border-md);
+            background: var(--surface-2);
+            border-radius: var(--radius);
+            padding: 16px;
         }
-
-        .panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(16px);
-        }
-
-        .left-panel {
-            padding: 34px;
-        }
-
-        .right-panel {
-            padding: 34px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .eyebrow {
-            display: inline-block;
-            margin-bottom: 14px;
-            padding: 8px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            color: #dce8ff;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        h1 {
-            margin: 0 0 10px;
-            font-size: 34px;
-        }
-
-        .subtitle {
-            margin: 0 0 28px;
-            color: var(--muted);
-            line-height: 1.75;
-        }
-
-        .field {
-            margin-bottom: 18px;
-        }
-
-        .field label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #dbe7ff;
-        }
-
-        .field input[type="text"],
-        .upload-box {
-            width: 100%;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-        }
-
-        .field input[type="text"] {
-            padding: 15px 16px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.25s, box-shadow 0.25s;
-        }
-
-        .field input[type="text"]:focus {
-            border-color: rgba(79, 140, 255, 0.75);
-            box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.16);
-        }
-
-        .upload-box {
-            padding: 18px;
-        }
-
-        .upload-box p {
-            margin: 0 0 12px;
-            color: var(--muted);
-            line-height: 1.6;
-            font-size: 14px;
-        }
-
-        .upload-box input[type="file"] {
-            width: 100%;
-            color: #dce7ff;
-        }
-
+        .upload-area p { margin: 0 0 12px; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+        .upload-area input[type="file"] { width: 100%; color: var(--text-muted); font-size: 13px; }
         ::-webkit-file-upload-button {
-            border: none;
-            border-radius: 12px;
-            padding: 10px 14px;
-            margin-right: 12px;
-            background: rgba(79, 140, 255, 0.18);
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
+            border: none; border-radius: 8px; padding: 8px 12px; margin-right: 10px;
+            background: var(--violet-dim); color: var(--violet); font-weight: 700; cursor: pointer;
         }
-
-        .action-btn,
-        .back-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            border-radius: 14px;
-            font-weight: 700;
-            transition: transform 0.2s ease, background 0.2s ease;
-        }
-
-        .action-btn {
-            width: 100%;
-            margin-top: 8px;
-            border: none;
-            padding: 15px 18px;
-            background: linear-gradient(135deg, var(--primary), #69a0ff);
-            color: white;
-            cursor: pointer;
-            box-shadow: 0 12px 28px rgba(79, 140, 255, 0.32);
-        }
-
-        .action-btn:hover,
-        .back-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .result-card {
-            padding: 24px;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .result-card h2 {
-            margin: 0 0 18px;
-            font-size: 24px;
-        }
-
-        .empty-state {
-            color: var(--muted);
-            line-height: 1.8;
-            font-size: 15px;
-        }
-
-        .score-grid {
-            display: grid;
-            gap: 12px;
-            margin-bottom: 22px;
-        }
-
-        .score-item {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .score-item span:first-child { color: var(--muted); }
-        .score-item strong { font-size: 15px; }
-
-        .decision {
-            padding: 16px 18px;
-            border-radius: 16px;
-            text-align: center;
-            font-size: 24px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            background: {% raw %}{{ 'var(--danger-bg)' if result and result.decision == 'FORGED' else 'var(--success-bg)' }}{% endraw %};
-            border: 1px solid {% raw %}{{ 'var(--danger-border)' if result and result.decision == 'FORGED' else 'var(--success-border)' }}{% endraw %};
-            color: white;
-        }
-
-        .back-btn {
-            margin-top: 18px;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.06);
-            color: #dbe7ff;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            width: fit-content;
-        }
-
-        @media (max-width: 920px) {
-            .page {
-                grid-template-columns: 1fr;
-            }
-
-            body {
-                padding: 18px;
-            }
-        }
+        @media (max-width: 900px) { .verify-layout { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="page">
-        <section class="panel left-panel">
-            <span class="eyebrow">Verification Module</span>
-            <h1>Verify a single signature</h1>
-            <p class="subtitle">
-                Enter the student ID, upload the signature image, and let FASDA compare it using CNN,
-                HOG, and hybrid scoring.
-            </p>
+<header class="mobile-header">
+    <div class="sb-logo">
+        <div class="sb-logo-mark" style="width:28px;height:28px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <span class="sb-logo-text">FASDA</span>
+    </div>
+    <button id="hamburger" class="hamburger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+</header>
 
-            <form method="post" enctype="multipart/form-data">
-                <div class="field">
-                    <label for="student_id">Student ID</label>
-                    <input id="student_id" type="text" name="student_id" placeholder="Example: 001-400" required>
+<div class="app-shell">
+    <nav class="sidebar">
+        <div class="sb-header">
+            <div class="sb-logo">
+                <div class="sb-logo-mark">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                 </div>
+                <span class="sb-logo-text">FASDA</span>
+            </div>
+        </div>
+        <div class="sb-nav">
+            <a href="/dashboard" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </a>
+            {% if role != 'admin' %}
+            <a href="/verify" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Verify Signature
+            </a>
+            <a href="/attendance" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Attendance
+            </a>
+            {% endif %}
+            {% if role == 'admin' %}
+            <div class="sb-divider"></div>
+            <a href="/admin" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Admin Panel
+            </a>
+            <a href="/plots" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Distribution Plots
+            </a>
+            <a href="/benchmark" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Benchmark
+            </a>
+            {% endif %}
+        </div>
+        <div class="sb-footer">
+            <a href="/profile" class="sb-user">
+                <div class="sb-avatar {% if role == 'admin' %}admin{% endif %}">{{ (display_name or 'U')[0]|upper }}</div>
+                <div>
+                    <div class="sb-user-name">{{ display_name }}</div>
+                    <div class="sb-user-role">{{ 'Administrator' if role == 'admin' else 'User' }}</div>
+                </div>
+            </a>
+            <a href="/logout" class="sb-logout" title="Logout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </a>
+        </div>
+    </nav>
 
-                <div class="field">
-                    <label for="signature">Signature Image</label>
-                    <div class="upload-box">
-                        <p>Select a clear cropped signature image for the best verification result.</p>
-                        <input id="signature" type="file" name="signature" accept="image/*" required>
+    <main class="app-main">
+        <div class="page-header anim-down">
+            <div>
+                <div class="page-title">Verify Signature</div>
+                <div class="page-desc">Enter the student ID, upload the signature image, and let FASDA compare it using CNN, HOG, and hybrid scoring.</div>
+            </div>
+            <div class="page-actions">
+                <a href="/dashboard" class="btn btn-ghost btn-sm">← Dashboard</a>
+            </div>
+        </div>
+
+        <div class="verify-layout">
+            <div class="card anim-up">
+                <div class="badge badge-emerald" style="margin-bottom:16px;">Verification Module</div>
+
+                <form method="post" enctype="multipart/form-data">
+                    <div class="field">
+                        <label class="field-label" for="student_id">Student ID</label>
+                        <input class="field-input" id="student_id" type="text" name="student_id" placeholder="Example: 001-400" required>
                     </div>
-                </div>
 
-                <button type="submit" class="action-btn">Run Verification</button>
-            </form>
+                    <div class="field">
+                        <label class="field-label" for="signature">Signature Image</label>
+                        <div class="upload-area">
+                            <p>Select a clear cropped signature image for the best verification result.</p>
+                            <input id="signature" type="file" name="signature" accept="image/*" required>
+                        </div>
+                    </div>
 
-            <a href="/dashboard" class="back-btn">← Back to Dashboard</a>
-        </section>
+                    <button type="submit" class="btn btn-primary btn-full" style="margin-top:8px;">Run Verification</button>
+                </form>
+            </div>
 
-        <section class="panel right-panel">
-            {% if result %}
-            <div class="result-card">
-                <h2>Analysis Results</h2>
+            <div class="card anim-up" style="animation-delay:0.07s;">
+                {% if result %}
+                <h3 style="font-size:18px;font-weight:700;margin-bottom:18px;">Analysis Results</h3>
 
-                <div class="score-grid">
-                    <div class="score-item">
+                <div style="margin-bottom:16px;">
+                    <div class="score-row">
                         <span>CNN Similarity</span>
                         <strong>{{ result.cnn }}</strong>
                     </div>
-                    <div class="score-item">
+                    <div class="score-row">
                         <span>HOG Similarity</span>
                         <strong>{{ result.hog }}</strong>
                     </div>
-                    <div class="score-item">
+                    <div class="score-row">
                         <span>Hybrid Score</span>
                         <strong>{{ result.hybrid }}</strong>
                     </div>
                 </div>
 
-                <div class="decision">{{ result.decision }}</div>
+                {% if result.decision == 'FORGED' %}
+                <div class="decision-forged">{{ result.decision }}</div>
+                {% else %}
+                <div class="decision-genuine">{{ result.decision }}</div>
+                {% endif %}
+
+                {% else %}
+                <h3 style="font-size:18px;font-weight:700;margin-bottom:12px;">Ready for analysis</h3>
+                <p class="empty-state" style="text-align:left;padding:0;">Your verification result will appear here after upload. This side is reserved for the final scores and the system decision so the user can read the output more clearly.</p>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="result-card">
-                <h2>Ready for analysis</h2>
-                <p class="empty-state">
-                    Your verification result will appear here after upload. This side is reserved for the
-                    final scores and the system decision so the user can read the output more clearly.
-                </p>
-            </div>
-            {% endif %}
-        </section>
-    </div>
+        </div>
+    </main>
+</div>
+
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150;" class=""></div>
+<button id="theme-toggle" onclick="_fasdaToggleTheme()" title="Toggle theme">☀️</button>
+<script src="/static/theme.js"></script>
 </body>
 </html>

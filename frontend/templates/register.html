@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FASDA | Register</title>
+    <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+    <link rel="stylesheet" href="/static/fasda.css">
+    <link rel="stylesheet" href="/static/theme.css">
+</head>
+<body>
+<div class="auth-shell">
+    <section class="auth-brand anim-down">
+        <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:32px;">
+                <div class="sb-logo-mark" style="width:36px;height:36px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <span class="sb-logo-text" style="font-size:18px;">FASDA</span>
+            </div>
+            <div class="badge badge-violet" style="margin-bottom:20px;">Secure Attendance Verification</div>
+            <h1 style="font-size:clamp(26px,4vw,40px);font-weight:800;line-height:1.1;margin-bottom:14px;color:var(--text);">Create your account to get started.</h1>
+            <p style="color:var(--text-muted);line-height:1.75;font-size:15px;">Register to access the FASDA signature verification platform. Your account will be reviewed by an administrator before activation.</p>
+        </div>
+        <div>
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <strong>Quick Registration</strong>
+                    <span>Fill in your details and submit. Your account is created instantly and awaits admin review.</span>
+                </div>
+                <div class="auth-feature">
+                    <strong>Admin Approval Required</strong>
+                    <span>For security, all new accounts must be approved by an administrator before you can access any features.</span>
+                </div>
+                <div class="auth-feature">
+                    <strong>Secure Platform</strong>
+                    <span>Your credentials are stored securely. Each user can only access the modules their role permits.</span>
+                </div>
+            </div>
+            <div style="margin-top:16px;padding:14px 16px;border-radius:var(--radius);background:var(--amber-dim);border:1px solid var(--amber-border);display:flex;gap:12px;align-items:flex-start;">
+                <span style="font-size:16px;flex-shrink:0;">⏳</span>
+                <p style="margin:0;color:var(--amber);font-size:13px;line-height:1.6;">After registering, you will be able to log in, but features will remain locked until an administrator approves your account.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="auth-form-wrap">
+        <div style="max-width:420px;width:100%;margin:0 auto;" class="anim-up">
+            <h2 style="font-size:26px;font-weight:700;margin-bottom:6px;color:var(--text);">Create Account</h2>
+            <p style="color:var(--text-muted);margin-bottom:24px;font-size:14px;line-height:1.6;">Fill in the details below. An admin will review and activate your account.</p>
+
+            <form method="post">
+                <div class="field-row">
+                    <div class="field">
+                        <label class="field-label" for="first_name">First Name</label>
+                        <input class="field-input" id="first_name" name="first_name" type="text" placeholder="First name" required>
+                    </div>
+                    <div class="field">
+                        <label class="field-label" for="last_name">Last Name</label>
+                        <input class="field-input" id="last_name" name="last_name" type="text" placeholder="Last name" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="phone">Phone</label>
+                    <input class="field-input" id="phone" name="phone" type="tel" placeholder="Your phone number (optional)">
+                </div>
+                <div class="field">
+                    <label class="field-label" for="username">Username</label>
+                    <input class="field-input" id="username" name="username" type="text" placeholder="Choose a username" required>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="password">Password</label>
+                    <input class="field-input" id="password" name="password" type="password" placeholder="Choose a password" required>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="confirm_password">Confirm Password</label>
+                    <input class="field-input" id="confirm_password" name="confirm_password" type="password" placeholder="Repeat your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:6px;">Create Account</button>
+            </form>
+
+            {% if error %}
+            <div class="alert alert-error" style="margin-top:16px;">{{ error }}</div>
+            {% endif %}
+            {% if success %}
+            <div class="alert alert-success" style="margin-top:16px;">{{ success }}</div>
+            {% endif %}
+
+            <div style="margin-top:18px;text-align:center;font-size:14px;color:var(--text-muted);">
+                Already have an account? <a href="{{ url_for('login') }}" style="color:var(--violet);font-weight:600;">Sign in</a>
+            </div>
+        </div>
+    </section>
+</div>
+<button id="theme-toggle" onclick="_fasdaToggleTheme()" title="Toggle theme">☀️</button>
+<script src="/static/theme.js"></script>
+</body>
+</html>

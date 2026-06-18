@@ -4,166 +4,255 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FASDA | Dashboard</title>
+    <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+    <link rel="stylesheet" href="/static/fasda.css">
+    <link rel="stylesheet" href="/static/theme.css">
     <style>
-        :root {
-            --bg-1: #061120; --bg-2: #0f2343; --panel: rgba(9, 18, 34, 0.8); --panel-soft: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1); --text: #edf4ff; --muted: #9eb0d0; --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin:0; min-height:100vh; color:var(--text); font-family: Inter, "Segoe UI", Arial, sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(79, 140, 255, 0.16), transparent 24%),
-                radial-gradient(circle at bottom right, rgba(57, 208, 164, 0.12), transparent 22%),
-                linear-gradient(135deg, var(--bg-1), var(--bg-2));
-            padding:28px;
-        }
-        .wrapper { max-width:1200px; margin:0 auto; }
-        .topbar {
-            background:var(--panel); border:1px solid var(--border); box-shadow:var(--shadow); backdrop-filter: blur(16px);
-            border-radius:24px; padding:24px 28px; display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:24px;
-        }
-        .title h1 { margin:0 0 6px; font-size:34px; }
-        .title p { margin:0; color:var(--muted); line-height:1.6; }
-        .status {
-            padding:12px 16px; border-radius:16px; background:rgba(57,208,164,.12); border:1px solid rgba(57,208,164,.22);
-            color:#d9fff3; font-size:14px; white-space:nowrap;
-        }
-        .overview { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-bottom:24px; }
-        .stat-card,.menu-card {
-            background:var(--panel); border:1px solid var(--border); border-radius:22px; box-shadow:var(--shadow); backdrop-filter: blur(16px);
-        }
-        .stat-card { padding:22px; }
-        .stat-label { color:var(--muted); font-size:14px; margin-bottom:10px; }
-        .stat-value { font-size:28px; font-weight:700; margin-bottom:8px; }
-        .stat-note { color:#cdd9ef; font-size:14px; line-height:1.5; }
-        .menu-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:18px; }
-
-        .menu-card {
-            padding:24px; text-decoration:none; color:var(--text);
-            transition:transform .22s ease, border-color .22s ease, background .22s ease, opacity .22s ease;
-            display:block;
-        }
-        .menu-card:hover {
-            transform:translateY(-4px); border-color:rgba(79,140,255,.35); background:rgba(12,24,44,.92);
-        }
-
-        .menu-card .tag {
-            display:inline-block; margin-bottom:14px; padding:7px 12px; border-radius:999px; font-size:12px;
-            background:var(--panel-soft); border:1px solid rgba(255,255,255,.08); color:#dbe7ff;
-        }
-        .menu-card h3 { margin:0 0 10px; font-size:24px; }
-        .menu-card p { margin:0; color:var(--muted); line-height:1.7; }
-
-        .menu-card.disabled {
-            opacity: 0.55;
-            filter: grayscale(40%);
-            cursor: not-allowed;
-            pointer-events: none;
-            background: rgba(120, 120, 120, 0.16);
-            border-color: rgba(255,255,255,0.08);
-        }
-
-        .menu-card.disabled:hover {
-            transform: none;
-            border-color: rgba(255,255,255,0.08);
-            background: rgba(120, 120, 120, 0.16);
-        }
-
-        .menu-card.disabled .tag {
-            background: rgba(255,255,255,0.06);
-            color: #c7cede;
-        }
-
-        .locked-note {
-            display: inline-block;
-            margin-top: 14px;
-            font-size: 12px;
-            color: #d6dbe8;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 6px 10px;
-            border-radius: 999px;
-        }
-
-        .footer-actions { margin-top:24px; display:flex; justify-content:flex-end; }
-        .logout-btn {
-            display:inline-flex; align-items:center; justify-content:center; padding:14px 20px; border-radius:14px; background:rgba(255,93,115,.14);
-            color:#ffd7dd; text-decoration:none; border:1px solid rgba(255,93,115,.24); font-weight:600;
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+        .menu-grid.three-col { grid-template-columns: repeat(3, 1fr); }
+        .reports-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .folder-icon { font-size: 22px; margin-bottom: 10px; }
+        .folder-name { font-size: 15px; font-weight: 700; margin-bottom: 5px; color: var(--text); }
+        .folder-meta { font-size: 12px; color: var(--text-muted); }
+        .section-label {
+            font-size: 11px; font-weight: 700; letter-spacing: 0.7px;
+            text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
         }
         @media (max-width: 900px) {
-            .overview,.menu-grid { grid-template-columns:1fr; }
-            .topbar { flex-direction:column; align-items:flex-start; }
-            body { padding:18px; }
+            .menu-grid, .menu-grid.three-col { grid-template-columns: 1fr; }
+            .reports-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .reports-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <section class="topbar">
-            <div class="title">
-                <h1>FASDA Dashboard</h1>
-                <p>Manage signature verification, attendance sheet analysis, and similarity visualizations from one central panel.</p>
-            </div>
-            <div class="status">Logged in as: <strong>{{ role|capitalize if role else 'User' }}</strong></div>
-        </section>
+<header class="mobile-header">
+    <div class="sb-logo">
+        <div class="sb-logo-mark" style="width:28px;height:28px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <span class="sb-logo-text">FASDA</span>
+    </div>
+    <button id="hamburger" class="hamburger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+</header>
 
-        <section class="overview">
+<div class="app-shell">
+    <nav class="sidebar">
+        <div class="sb-header">
+            <div class="sb-logo">
+                <div class="sb-logo-mark">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <span class="sb-logo-text">FASDA</span>
+            </div>
+        </div>
+        <div class="sb-nav">
+            <a href="/dashboard" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </a>
+            {% if role != 'admin' %}
+            <a href="/verify" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Verify Signature
+            </a>
+            <a href="/attendance" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Attendance
+            </a>
+            {% endif %}
+            {% if role == 'admin' %}
+            <div class="sb-divider"></div>
+            <a href="/admin" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Admin Panel
+            </a>
+            <a href="/plots" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Distribution Plots
+            </a>
+            <a href="/benchmark" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Benchmark
+            </a>
+            {% endif %}
+        </div>
+        <div class="sb-footer">
+            <a href="/profile" class="sb-user">
+                <div class="sb-avatar {% if role == 'admin' %}admin{% endif %}">{{ (display_name or 'U')[0]|upper }}</div>
+                <div>
+                    <div class="sb-user-name">{{ display_name }}</div>
+                    <div class="sb-user-role">{{ 'Administrator' if role == 'admin' else 'User' }}</div>
+                </div>
+            </a>
+            <a href="/logout" class="sb-logout" title="Logout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </a>
+        </div>
+    </nav>
+
+    <main class="app-main">
+
+        {% if pending_approval %}
+        <div class="pending-banner anim-down">
+            <div class="pending-banner-icon">⏳</div>
+            <div class="pending-banner-body">
+                <strong>Admin Approval Required</strong>
+                <span>Your account is awaiting administrator approval. You can preview the dashboard below, but all actions are locked until an admin activates your account.</span>
+            </div>
+            <span class="pending-badge">Pending Approval</span>
+        </div>
+        {% endif %}
+
+        <div class="page-header anim-down">
+            <div>
+                <div class="page-title">Dashboard</div>
+                <div class="page-desc">Manage signature verification, attendance sheet analysis, and system monitoring.</div>
+            </div>
+        </div>
+
+        
+        <div class="stats-row anim-up">
+            {% if role == 'admin' %}
+            <div class="stat-card">
+                <div class="stat-label">System Status</div>
+                <div class="stat-value"><span class="stat-dot" style="background:var(--emerald)"></span>Operational</div>
+                <div class="stat-note">All modules running. Admin access to full system configuration and user management.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Model Configuration</div>
+                <div class="stat-value">Alpha Weight</div>
+                <div class="stat-note">Adjust the hybrid model weight (ALPHA) from the Admin Panel to tune forgery detection sensitivity.</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Admin Privileges</div>
+                <div class="stat-value">Full Access</div>
+                <div class="stat-note">Benchmark generation, user management, and system configuration are all available to you.</div>
+            </div>
+            {% else %}
             <div class="stat-card">
                 <div class="stat-label">Verification Module</div>
                 <div class="stat-value">Single Signature</div>
-                <div class="stat-note">Quickly compare one uploaded signature against the registered student reference.</div>
+                <div class="stat-note">Quickly compare one uploaded signature against the registered student reference using CNN, HOG, and hybrid scoring.</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Attendance Module</div>
                 <div class="stat-value">Batch PDF Review</div>
-                <div class="stat-note">Upload one attendance sheet and inspect per-row verification scores and labels.</div>
+                <div class="stat-note">Upload one attendance sheet and inspect per-row verification scores, grouped by student ID.</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Analytics Module</div>
-                <div class="stat-value">{% if role == 'admin' %}Plots & Benchmarks{% else %}Plots Only{% endif %}</div>
-                <div class="stat-note">{% if role == 'admin' %}Visualize model distributions and compare performance outputs in one place.{% else %}Visualize model distributions. Benchmark generation is restricted to admin users.{% endif %}</div>
-            </div>
-        </section>
-
-        <section class="menu-grid">
-            <a href="/verify" class="menu-card">
-                <span class="tag">Verification</span>
-                <h3>Verify Single Signature</h3>
-                <p>Upload one signature image, enter the student ID, and review CNN, HOG, and hybrid decision results.</p>
-            </a>
-
-            <a href="/attendance" class="menu-card">
-                <span class="tag">Attendance</span>
-                <h3>Upload Attendance Sheet</h3>
-                <p>Submit a PDF attendance list and receive annotated attendance pages together with detected forgeries.</p>
-            </a>
-
-            <a href="/plots" class="menu-card">
-                <span class="tag">Visualization</span>
-                <h3>Similarity Distributions</h3>
-                <p>Inspect model score distributions for CNN, HOG, and hybrid matching strategies on a dedicated page.</p>
-            </a>
-
-            {% if role == 'admin' %}
-            <a href="/benchmark" class="menu-card">
-                <span class="tag">Benchmark</span>
-                <h3>Generate Benchmark Graphs</h3>
-                <p>Open benchmark outputs to present system performance and compare model-level evaluation metrics.</p>
-            </a>
-            {% else %}
-            <div class="menu-card disabled" aria-disabled="true" title="Only admins can access benchmark graphs">
-                <span class="tag">Benchmark</span>
-                <h3>Generate Benchmark Graphs</h3>
-                <p>Open benchmark outputs to present system performance and compare model-level evaluation metrics.</p>
-                <span class="locked-note">Admin only</span>
+                <div class="stat-label">Access Level</div>
+                <div class="stat-value">
+                    {% if pending_approval %}
+                    <span class="stat-dot" style="background:var(--amber)"></span>Pending
+                    {% else %}
+                    <span class="stat-dot" style="background:var(--violet)"></span>Standard User
+                    {% endif %}
+                </div>
+                <div class="stat-note">
+                    {% if pending_approval %}
+                    Awaiting administrator approval. Contact your admin to get your account activated.
+                    {% else %}
+                    Contact your administrator to request additional access or to report issues.
+                    {% endif %}
+                </div>
             </div>
             {% endif %}
-        </section>
-
-        <div class="footer-actions">
-            <a href="/logout" class="logout-btn">Logout</a>
         </div>
-    </div>
+
+        
+        {% if role == 'admin' %}
+        <div>
+            <div class="section-label">Admin Actions</div>
+            <div class="menu-grid three-col">
+                <a href="/admin" class="menu-card mc-amber anim-up">
+                    <span class="mc-tag">User Handling</span>
+                    <h3>Admin Panel</h3>
+                    <p>Approve or remove users, adjust the hybrid model weight (ALPHA), and manage system-wide settings.</p>
+                    <span class="mc-arrow">Open panel →</span>
+                </a>
+                <a href="/benchmark" class="menu-card mc-amber anim-up" style="animation-delay:0.05s;">
+                    <span class="mc-tag">Benchmark</span>
+                    <h3>Benchmark Graphs</h3>
+                    <p>Generate performance graphs comparing model-level evaluation metrics and distribution outputs.</p>
+                    <span class="mc-arrow">Run benchmark →</span>
+                </a>
+                <a href="/plots" class="menu-card mc-amber anim-up" style="animation-delay:0.1s;">
+                    <span class="mc-tag">Similarity Distribution</span>
+                    <h3>Distribution Plots</h3>
+                    <p>Inspect CNN, HOG, and hybrid score distributions to understand how the system separates genuine from forged.</p>
+                    <span class="mc-arrow">View plots →</span>
+                </a>
+            </div>
+        </div>
+
+        {% else %}
+        <div>
+            <div class="section-label">Your Tools</div>
+            <div class="menu-grid">
+                {% if pending_approval %}
+                <div class="menu-card mc-emerald card-locked">
+                {% else %}
+                <a href="/verify" class="menu-card mc-emerald anim-up">
+                {% endif %}
+                    <span class="mc-tag">Verification</span>
+                    <h3>Verify Single Signature</h3>
+                    <p>Upload one signature image, enter the student ID, and review CNN, HOG, and hybrid decision results instantly.</p>
+                    <span class="mc-arrow">Start verification →</span>
+                {% if pending_approval %}</div>{% else %}</a>{% endif %}
+
+                {% if pending_approval %}
+                <div class="menu-card mc-emerald card-locked">
+                {% else %}
+                <a href="/attendance" class="menu-card mc-emerald anim-up" style="animation-delay:0.06s;">
+                {% endif %}
+                    <span class="mc-tag">Attendance</span>
+                    <h3>Upload Attendance Sheet</h3>
+                    <p>Submit a PDF attendance list and receive annotated attendance pages together with detected forgeries grouped by student.</p>
+                    <span class="mc-arrow">Upload sheet →</span>
+                {% if pending_approval %}</div>{% else %}</a>{% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        
+        {% if role != 'admin' %}
+        <div class="anim-up" style="animation-delay:0.15s;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+                <div class="section-label" style="margin-bottom:0;">My Reports</div>
+            </div>
+            <div class="reports-grid">
+                {% if reports_summary %}
+                    {% for folder in reports_summary %}
+                    <a href="/reports/{{ folder.slug }}" class="folder-card">
+                        <div class="folder-icon">📁</div>
+                        <div class="folder-name">{{ folder.display }}</div>
+                        <div class="folder-meta">
+                            {{ folder.count }} report{{ 's' if folder.count != 1 else '' }}
+                            {% if folder.latest_ts %}
+                                · {{ folder.latest_ts[:10] }}
+                            {% endif %}
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="card" style="grid-column:1/-1;">
+                        <div class="empty-state">No saved reports yet. Generate a report from the attendance results page to see it here.</div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </main>
+</div>
+
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150;" class=""></div>
+<button id="theme-toggle" onclick="_fasdaToggleTheme()" title="Toggle theme">☀️</button>
+<script src="/static/theme.js"></script>
 </body>
 </html>

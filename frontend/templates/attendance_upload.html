@@ -4,235 +4,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FASDA | Upload Attendance Sheet</title>
+    <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+    <link rel="stylesheet" href="/static/fasda.css">
+    <link rel="stylesheet" href="/static/theme.css">
     <style>
-        :root {
-            --bg-1: #061120;
-            --bg-2: #0f2343;
-            --panel: rgba(9, 18, 34, 0.86);
-            --panel-soft: rgba(255,255,255,0.05);
-            --border: rgba(255,255,255,0.10);
-            --text: #edf4ff;
-            --muted: #9eb0d0;
-            --primary: #4f8cff;
-            --primary-2: #69a0ff;
-            --danger: #ffb4c0;
-            --danger-bg: rgba(255, 93, 115, 0.12);
-            --shadow: 0 24px 60px rgba(0,0,0,0.35);
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            color: var(--text);
-            font-family: Inter, "Segoe UI", Arial, sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(79, 140, 255, 0.16), transparent 24%),
-                radial-gradient(circle at bottom right, rgba(57, 208, 164, 0.12), transparent 22%),
-                linear-gradient(135deg, var(--bg-1), var(--bg-2));
-            padding: 28px;
-        }
-
-        .wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .topbar {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(16px);
-            border-radius: 24px;
-            padding: 24px 28px;
-            margin-bottom: 24px;
-        }
-
-        .topbar h1 {
-            margin: 0 0 8px;
-            font-size: 34px;
-        }
-
-        .topbar p {
-            margin: 0;
-            color: var(--muted);
-            line-height: 1.6;
-        }
-
         .upload-layout {
             display: grid;
             grid-template-columns: 380px 1fr;
             gap: 22px;
         }
-
-        .panel {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(16px);
-            padding: 22px;
-        }
-
-        .panel h3 {
-            margin-top: 0;
-            margin-bottom: 14px;
-            font-size: 22px;
-        }
-
-        .panel p {
-            color: var(--muted);
-            line-height: 1.7;
-        }
-
         .upload-box {
-            border: 1px dashed rgba(255,255,255,0.14);
-            background: rgba(255,255,255,0.03);
-            border-radius: 18px;
+            border: 1px dashed var(--border-md);
+            background: var(--surface-2);
+            border-radius: var(--radius);
             padding: 18px;
-            margin-top: 16px;
+            margin-top: 14px;
         }
-
         .file-input {
-            width: 100%;
-            padding: 12px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.10);
-            background: rgba(255,255,255,0.06);
+            width: 100%; padding: 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--surface-3);
             color: var(--text);
             cursor: pointer;
         }
-
         .file-input::file-selector-button {
-            border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            margin-right: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-            color: white;
-            font-weight: 700;
-            cursor: pointer;
+            border: none; border-radius: 7px; padding: 8px 12px; margin-right: 10px;
+            background: var(--violet-dim); color: var(--violet); font-weight: 700; cursor: pointer;
         }
-
-        .upload-btn {
-            width: 100%;
-            margin-top: 16px;
-            padding: 14px 18px;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-            color: white;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform .18s ease, opacity .18s ease;
-        }
-
-        .upload-btn:hover {
-            transform: translateY(-1px);
-            opacity: 0.96;
-        }
-
-        .meta-box, .error-box, .hint-box {
-            margin-top: 16px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.08);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
         .meta-box {
-            background: rgba(255,255,255,0.05);
-            color: #d7e4ff;
-            display: none;
+            margin-top: 14px; padding: 12px 14px; border-radius: var(--radius);
+            background: var(--surface-2); border: 1px solid var(--border);
+            font-size: 13px; color: var(--text-muted); display: none;
         }
-
         .hint-box {
-            background: rgba(255,255,255,0.05);
-            color: var(--muted);
+            margin-top: 14px; padding: 12px 14px; border-radius: var(--radius);
+            background: var(--surface-2); border: 1px solid var(--border);
+            font-size: 13px; color: var(--text-muted); line-height: 1.6;
         }
-
-        .error-box {
-            background: var(--danger-bg);
-            color: var(--danger);
-            border-color: rgba(255,93,115,.24);
-        }
-
-        .preview-area {
-            min-height: 620px;
-            display: flex;
-            flex-direction: column;
-        }
-
+        .preview-area { min-height: 580px; display: flex; flex-direction: column; }
         .preview-placeholder {
-            flex: 1;
-            min-height: 540px;
-            border-radius: 18px;
-            border: 1px dashed rgba(255,255,255,0.12);
-            background: rgba(255,255,255,0.03);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            color: var(--muted);
-            padding: 20px;
+            flex: 1; min-height: 520px; border-radius: var(--radius);
+            border: 1px dashed var(--border-md); background: var(--surface-2);
+            display: flex; align-items: center; justify-content: center;
+            text-align: center; color: var(--text-muted); padding: 20px; font-size: 14px;
         }
-
         .pdf-preview {
-            width: 100%;
-            height: 620px;
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 18px;
-            background: white;
-            display: none;
+            width: 100%; height: 580px;
+            border: 1px solid var(--border); border-radius: var(--radius);
+            background: white; display: none;
+        }
+        @media (max-width: 960px) {
+            .upload-layout { grid-template-columns: 1fr; }
+            .pdf-preview, .preview-placeholder { min-height: 380px; height: 380px; }
         }
 
-        .back-link {
-            display: inline-block;
-            margin-top: 18px;
-            color: #dbe7ff;
-            text-decoration: none;
-            font-size: 14px;
+        /* Loading overlay */
+        .loading-overlay {
+            display: none; position: fixed; inset: 0; z-index: 9999;
+            background: rgba(10,14,26,0.85); backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            align-items: center; justify-content: center;
         }
-
-        .back-link:hover {
-            text-decoration: underline;
+        .loading-overlay.active { display: flex; }
+        .loading-card {
+            background: var(--surface); border: 1px solid var(--violet-border);
+            border-radius: 28px; box-shadow: 0 40px 100px rgba(0,0,0,0.55);
+            padding: 44px 48px; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 22px;
+            max-width: 420px; width: 92%;
+            animation: popIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
         }
-
-        @media (max-width: 980px) {
-            .upload-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .pdf-preview,
-            .preview-placeholder {
-                min-height: 420px;
-                height: 420px;
-            }
-
-            .topbar h1 {
-                font-size: 28px;
-            }
-
-            body {
-                padding: 18px;
-            }
+        .spinner-ring {
+            width: 64px; height: 64px; position: relative; flex-shrink: 0;
         }
+        .spinner-ring::before, .spinner-ring::after {
+            content: ''; position: absolute; inset: 0; border-radius: 50%;
+        }
+        .spinner-ring::before { border: 4px solid var(--violet-dim); }
+        .spinner-ring::after {
+            border: 4px solid transparent;
+            border-top-color: var(--violet);
+            border-right-color: rgba(139,92,246,0.5);
+            animation: spin 0.85s linear infinite;
+        }
+        .loading-label { display: flex; flex-direction: column; gap: 7px; }
+        .loading-label h2 { margin: 0; font-size: 20px; font-weight: 700; color: var(--text); }
+        .loading-label p  { margin: 0; font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+        .loading-steps { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+        .lstep {
+            display: flex; align-items: center; gap: 10px; padding: 9px 13px;
+            border-radius: 10px; border: 1px solid var(--border);
+            background: var(--surface-2); font-size: 13px; color: var(--text-muted);
+            transition: background 0.4s, border-color 0.4s, color 0.4s;
+        }
+        .lstep.done { background: var(--emerald-dim); border-color: var(--emerald-border); color: var(--emerald); }
+        .lstep.active { background: var(--violet-dim); border-color: var(--violet-border); color: var(--text); }
+        .lstep-icon { font-size: 14px; flex-shrink: 0; }
+        .elapsed { font-size: 12px; color: var(--text-subtle); font-variant-numeric: tabular-nums; }
+        @keyframes spin  { to { transform: rotate(360deg); } }
+        @keyframes popIn { from { opacity:0; transform:scale(0.88); } to { opacity:1; transform:scale(1); } }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <section class="topbar">
-            <h1>Upload Attendance Sheet</h1>
-            <p>Select a PDF attendance sheet, preview it before submission, and then send it for forgery analysis.</p>
-        </section>
+<header class="mobile-header">
+    <div class="sb-logo">
+        <div class="sb-logo-mark" style="width:28px;height:28px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <span class="sb-logo-text">FASDA</span>
+    </div>
+    <button id="hamburger" class="hamburger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+</header>
+
+<div class="app-shell">
+    <nav class="sidebar">
+        <div class="sb-header">
+            <div class="sb-logo">
+                <div class="sb-logo-mark">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <span class="sb-logo-text">FASDA</span>
+            </div>
+        </div>
+        <div class="sb-nav">
+            <a href="/dashboard" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </a>
+            {% if role != 'admin' %}
+            <a href="/verify" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Verify Signature
+            </a>
+            <a href="/attendance" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Attendance
+            </a>
+            {% endif %}
+            {% if role == 'admin' %}
+            <div class="sb-divider"></div>
+            <a href="/admin" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Admin Panel
+            </a>
+            <a href="/plots" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Distribution Plots
+            </a>
+            <a href="/benchmark" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Benchmark
+            </a>
+            {% endif %}
+        </div>
+        <div class="sb-footer">
+            <a href="/profile" class="sb-user">
+                <div class="sb-avatar {% if role == 'admin' %}admin{% endif %}">{{ (display_name or 'U')[0]|upper }}</div>
+                <div>
+                    <div class="sb-user-name">{{ display_name }}</div>
+                    <div class="sb-user-role">{{ 'Administrator' if role == 'admin' else 'User' }}</div>
+                </div>
+            </a>
+            <a href="/logout" class="sb-logout" title="Logout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </a>
+        </div>
+    </nav>
+
+    <main class="app-main">
+        <div class="page-header anim-down">
+            <div>
+                <div class="page-title">Upload Attendance Sheet</div>
+                <div class="page-desc">Select a PDF attendance sheet, preview it before submission, and then send it for forgery analysis.</div>
+            </div>
+            <div class="page-actions">
+                <a href="/dashboard" class="btn btn-ghost btn-sm">← Dashboard</a>
+            </div>
+        </div>
 
         <div class="upload-layout">
-            <section class="panel">
-                <h3>Attendance PDF</h3>
-                <p>Choose the scanned attendance sheet you want to process. A preview will appear on the right before upload.</p>
+            <section class="card anim-up">
+                <h3 style="font-size:18px;font-weight:700;margin-bottom:10px;">Attendance PDF</h3>
+                <p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin:0;">Choose the scanned attendance sheet you want to process. A preview will appear on the right before upload.</p>
 
                 <form method="post" enctype="multipart/form-data">
                     <div class="upload-box">
@@ -244,8 +200,7 @@
                             accept="application/pdf,.pdf"
                             required
                         >
-
-                        <button type="submit" class="upload-btn">Upload & Process</button>
+                        <button type="submit" class="btn btn-primary btn-full" style="margin-top:14px;">Upload &amp; Process</button>
                     </div>
 
                     <div id="metaBox" class="meta-box">
@@ -255,7 +210,7 @@
                     </div>
 
                     {% if error %}
-                        <div class="error-box">{{ error }}</div>
+                        <div class="alert alert-error" style="margin-top:14px;">{{ error }}</div>
                     {% endif %}
 
                     <div class="hint-box">
@@ -263,12 +218,10 @@
                         Recommendation: use a clear scanned sheet for better segmentation and signature detection.
                     </div>
                 </form>
-
-                <a href="/dashboard" class="back-link">← Back to Dashboard</a>
             </section>
 
-            <section class="panel preview-area">
-                <h3>PDF Preview</h3>
+            <section class="card preview-area anim-up" style="animation-delay:0.07s;">
+                <h3 style="font-size:18px;font-weight:700;margin-bottom:14px;">PDF Preview</h3>
 
                 <div id="previewPlaceholder" class="preview-placeholder">
                     No PDF selected yet.<br><br>
@@ -278,59 +231,107 @@
                 <iframe id="pdfPreview" class="pdf-preview"></iframe>
             </section>
         </div>
+    </main>
+</div>
+
+
+<div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-card">
+        <div class="spinner-ring"></div>
+        <div class="loading-label">
+            <h2>Analysing Attendance Sheet</h2>
+            <p>Please wait — this may take a moment.<br>Do not close or refresh this tab.</p>
+        </div>
+        <div class="loading-steps">
+            <div class="lstep" id="ls1">
+                <span class="lstep-icon">📄</span>
+                <span>Extracting PDF pages</span>
+            </div>
+            <div class="lstep" id="ls2">
+                <span class="lstep-icon">✂️</span>
+                <span>Segmenting signature areas</span>
+            </div>
+            <div class="lstep" id="ls3">
+                <span class="lstep-icon">🧠</span>
+                <span>Running forgery detection model</span>
+            </div>
+            <div class="lstep" id="ls4">
+                <span class="lstep-icon">📊</span>
+                <span>Generating analysis results</span>
+            </div>
+        </div>
+        <div class="elapsed" id="elapsedLabel">Elapsed: 0s</div>
     </div>
+</div>
 
-    <script>
-        const pdfInput = document.getElementById("pdfInput");
-        const pdfPreview = document.getElementById("pdfPreview");
-        const previewPlaceholder = document.getElementById("previewPlaceholder");
-        const metaBox = document.getElementById("metaBox");
-        const fileName = document.getElementById("fileName");
-        const fileSize = document.getElementById("fileSize");
+<script>
+    const pdfInput = document.getElementById("pdfInput");
+    const pdfPreview = document.getElementById("pdfPreview");
+    const previewPlaceholder = document.getElementById("previewPlaceholder");
+    const metaBox = document.getElementById("metaBox");
+    const fileName = document.getElementById("fileName");
+    const fileSize = document.getElementById("fileSize");
 
-        let currentObjectUrl = null;
+    let currentObjectUrl = null;
 
-        function formatFileSize(bytes) {
-            if (bytes < 1024) return bytes + " B";
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
-            return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+    }
+
+    pdfInput.addEventListener("change", function () {
+        const file = this.files && this.files[0];
+        if (currentObjectUrl) { URL.revokeObjectURL(currentObjectUrl); currentObjectUrl = null; }
+        if (!file) {
+            pdfPreview.style.display = "none"; pdfPreview.src = "";
+            previewPlaceholder.style.display = "flex"; metaBox.style.display = "none";
+            return;
         }
+        if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+            alert("Please select a valid PDF file."); this.value = "";
+            pdfPreview.style.display = "none"; pdfPreview.src = "";
+            previewPlaceholder.style.display = "flex"; metaBox.style.display = "none";
+            return;
+        }
+        fileName.textContent = file.name;
+        fileSize.textContent = "Size: " + formatFileSize(file.size);
+        metaBox.style.display = "block";
+        currentObjectUrl = URL.createObjectURL(file);
+        pdfPreview.src = currentObjectUrl;
+        pdfPreview.style.display = "block";
+        previewPlaceholder.style.display = "none";
+    });
 
-        pdfInput.addEventListener("change", function () {
-            const file = this.files && this.files[0];
+    // Loading overlay logic
+    const form       = document.querySelector("form");
+    const overlay    = document.getElementById("loadingOverlay");
+    const steps      = ["ls1", "ls2", "ls3", "ls4"];
+    const stepTimes  = [0, 6, 14, 26];
+    const elapsedLbl = document.getElementById("elapsedLabel");
 
-            if (currentObjectUrl) {
-                URL.revokeObjectURL(currentObjectUrl);
-                currentObjectUrl = null;
-            }
-
-            if (!file) {
-                pdfPreview.style.display = "none";
-                pdfPreview.src = "";
-                previewPlaceholder.style.display = "flex";
-                metaBox.style.display = "none";
-                return;
-            }
-
-            if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-                alert("Please select a valid PDF file.");
-                this.value = "";
-                pdfPreview.style.display = "none";
-                pdfPreview.src = "";
-                previewPlaceholder.style.display = "flex";
-                metaBox.style.display = "none";
-                return;
-            }
-
-            fileName.textContent = file.name;
-            fileSize.textContent = "Size: " + formatFileSize(file.size);
-            metaBox.style.display = "block";
-
-            currentObjectUrl = URL.createObjectURL(file);
-            pdfPreview.src = currentObjectUrl;
-            pdfPreview.style.display = "block";
-            previewPlaceholder.style.display = "none";
+    form.addEventListener("submit", function () {
+        overlay.classList.add("active");
+        let seconds = 0;
+        const ticker = setInterval(() => {
+            seconds++;
+            elapsedLbl.textContent = "Elapsed: " + seconds + "s";
+        }, 1000);
+        steps.forEach((id, i) => {
+            setTimeout(() => {
+                if (i > 0) {
+                    const prev = document.getElementById(steps[i - 1]);
+                    prev.classList.remove("active"); prev.classList.add("done");
+                    prev.querySelector(".lstep-icon").textContent = "✅";
+                }
+                document.getElementById(id).classList.add("active");
+            }, stepTimes[i] * 1000);
         });
-    </script>
+    });
+</script>
+
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150;" class=""></div>
+<button id="theme-toggle" onclick="_fasdaToggleTheme()" title="Toggle theme">☀️</button>
+<script src="/static/theme.js"></script>
 </body>
 </html>

@@ -13,7 +13,6 @@ os.makedirs(UPLOADS_DIR, exist_ok=True)
 
 from config import PG_HOST, PG_PORT, PG_DATABASE, PG_USER, PG_PASSWORD
 
-
 def get_conn():
     conn = psycopg2.connect(
         host=PG_HOST,
@@ -23,7 +22,6 @@ def get_conn():
         password=PG_PASSWORD
     )
     return conn
-
 
 def init_flags_db():
     conn = get_conn()
@@ -50,7 +48,6 @@ def init_flags_db():
     cur.close()
     conn.close()
 
-
 def save_uploaded_pdf(temp_pdf_path):
     init_flags_db()
 
@@ -68,7 +65,6 @@ def save_uploaded_pdf(temp_pdf_path):
     shutil.copy2(temp_pdf_path, final_path)
 
     return final_name
-
 
 def toggle_flag(signature_key, student_id, student_name, source_pdf=""):
     init_flags_db()
@@ -88,7 +84,7 @@ def toggle_flag(signature_key, student_id, student_name, source_pdf=""):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     try:
-        # If already flagged in same PDF -> unflag
+
         cur.execute("""
             SELECT id, flag_code
             FROM flagged_students
@@ -111,7 +107,6 @@ def toggle_flag(signature_key, student_id, student_name, source_pdf=""):
                 "flag_id": existing["flag_code"]
             }
 
-        # Insert new flag
         cur.execute("""
             INSERT INTO flagged_students
             (flag_code, signature_key, student_id, student_name, source_pdf, created_at)
@@ -177,7 +172,6 @@ def toggle_flag(signature_key, student_id, student_name, source_pdf=""):
             "success": False,
             "error": str(e)
         }
-
 
 def get_flagged_map():
     init_flags_db()

@@ -4,332 +4,589 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FASDA | Attendance Results</title>
+    <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+    <link rel="stylesheet" href="/static/fasda.css">
+    <link rel="stylesheet" href="/static/theme.css">
     <style>
-        :root {
-            --bg-1: #061120;
-            --bg-2: #0f2343;
-            --panel: rgba(9, 18, 34, 0.86);
-            --border: rgba(255, 255, 255, 0.1);
-            --text: #edf4ff;
-            --muted: #9eb0d0;
-            --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        .result-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+            gap: 22px;
+            align-items: start;
         }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            min-height: 100vh;
-            color: var(--text);
-            font-family: Inter, "Segoe UI", Arial, sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(79, 140, 255, 0.16), transparent 24%),
-                radial-gradient(circle at bottom right, rgba(57, 208, 164, 0.12), transparent 22%),
-                linear-gradient(135deg, var(--bg-1), var(--bg-2));
-            padding: 28px;
+        .pages-col { display: grid; gap: 16px; }
+        .pages-header, .students-header {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 14px 18px;
+            display: flex; align-items: center; justify-content: space-between;
         }
-
-        .wrapper {
-            max-width: 1400px;
-            margin: 0 auto;
+        .pages-header h3, .students-header h3 { margin: 0; font-size: 15px; font-weight: 700; }
+        .pages-header span { font-size: 12px; color: var(--text-muted); }
+        .page-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-lg); padding: 16px; text-align: center;
         }
+        .page-card h4 { margin: 0 0 12px; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+        .page-card img { max-width: 100%; border-radius: 10px; border: 1px solid var(--border); }
 
-        .topbar {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            border-radius: 24px;
-            padding: 24px 28px;
-            margin-bottom: 24px;
+        .students-col { }
+        .students-header { margin-bottom: 12px; }
+        .count-badge { background: var(--violet-dim); border: 1px solid var(--violet-border); color: var(--violet); }
+
+        .student-group {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); margin-bottom: 10px; overflow: hidden;
+            transition: border-color 0.2s;
         }
-
-        .topbar h1 {
-            margin: 0 0 8px;
-            font-size: 34px;
+        .student-group.open { border-color: var(--violet-border); }
+        .student-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 13px 16px; cursor: pointer; gap: 12px;
+            transition: background 0.15s; user-select: none;
         }
-
-        .topbar p {
-            margin: 0;
-            color: var(--muted);
-            line-height: 1.6;
-        }
-
-        .page-block {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-
-        .page-block h3 {
-            margin-top: 0;
-            margin-bottom: 16px;
-        }
-
-        .page-block img {
-            max-width: 100%;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-        }
-
-        .table-panel {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            box-shadow: var(--shadow);
-            padding: 22px;
-            overflow-x: auto;
-        }
-
-        .table-panel h3 {
-            margin-top: 0;
-            margin-bottom: 18px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            overflow: hidden;
-            border-radius: 16px;
-        }
-
-        th, td {
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding: 12px 10px;
-            text-align: center;
-            vertical-align: middle;
+        .student-header:hover { background: var(--surface-2); }
+        .student-id-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .student-id-badge {
+            font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px;
+            background: var(--violet-dim); border: 1px solid var(--violet-border); color: var(--violet);
             white-space: nowrap;
         }
+        .student-summary { display: flex; gap: 6px; flex-wrap: wrap; }
+        .summary-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+        .pill-genuine { background: var(--emerald-dim); border: 1px solid var(--emerald-border); color: var(--emerald); }
+        .pill-forged  { background: var(--rose-dim);    border: 1px solid var(--rose-border);    color: var(--rose); }
+        .pill-unknown { background: var(--amber-dim);   border: 1px solid var(--amber-border);   color: var(--amber); }
+        .chevron { color: var(--text-muted); font-size: 14px; transition: transform 0.25s; flex-shrink: 0; }
+        .student-group.open .chevron { transform: rotate(180deg); }
+        .student-body { display: none; padding: 0 12px 12px; }
+        .student-group.open .student-body { display: block; }
 
-        th {
-            background: rgba(255,255,255,0.06);
-            color: #dbe7ff;
-            font-size: 14px;
+        .sig-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .sig-table th, .sig-table td {
+            padding: 9px 10px; border-bottom: 1px solid var(--border);
+            text-align: center; vertical-align: middle; white-space: nowrap;
         }
+        .sig-table th { color: var(--text-muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.3px; background: var(--surface-2); }
+        .sig-table tr:last-child td { border-bottom: none; }
+        .sig-table tr:hover td { background: var(--surface-2); }
+        .decision-forged  { color: var(--rose);    font-weight: 700; }
+        .decision-genuine { color: var(--emerald); font-weight: 700; }
+        .decision-unknown { color: var(--amber);   font-weight: 700; }
 
-        td {
-            background: rgba(255,255,255,0.02);
-            color: var(--text);
-            font-size: 14px;
+        .flag-btn {
+            padding: 5px 10px; border: none; border-radius: 7px; font-size: 10px; font-weight: 700;
+            cursor: pointer; transition: transform 0.15s, opacity 0.15s;
+            background: linear-gradient(90deg, var(--amber), #f97316); color: white;
         }
+        .flag-btn.flagged { background: linear-gradient(90deg, var(--emerald), #22c55e); }
+        .flag-btn.loading { opacity: 0.7; cursor: wait; }
+        .flag-btn:hover:not(.loading) { transform: translateY(-1px); opacity: 0.9; }
+        .flag-code { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
 
-        tr:hover td {
-            background: rgba(255,255,255,0.04);
+        .save-section {
+            margin-top: 20px; padding: 20px; border-radius: var(--radius);
+            background: var(--surface-2); border: 1px solid var(--border);
         }
+        .save-section h4 { margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--text); }
+        .save-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+        .save-input-wrap { flex: 1; min-width: 160px; }
+        .save-input-wrap label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .save-input {
+            width: 100%; padding: 10px 12px; border-radius: var(--radius-sm);
+            border: 1px solid var(--border-md); background: var(--surface);
+            color: var(--text); font-size: 13px; outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .save-input:focus { border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-dim); }
+        .save-input::placeholder { color: var(--text-subtle); }
+        .btn-save {
+            padding: 10px 18px; border: none; border-radius: var(--radius-sm); font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: transform 0.2s, opacity 0.2s; white-space: nowrap;
+            background: var(--violet); color: white;
+        }
+        .btn-save:hover:not(:disabled) { transform: translateY(-1px); opacity: 0.9; }
+        .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+        .existing-folders { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .folder-chip {
+            padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; cursor: pointer;
+            background: var(--violet-dim); border: 1px solid var(--violet-border); color: var(--violet);
+            transition: background 0.15s, transform 0.15s;
+        }
+        .folder-chip:hover { background: rgba(139,92,246,0.25); transform: translateY(-1px); }
+        .folder-chip.selected { background: var(--violet); color: white; border-color: var(--violet); }
+        .save-status {
+            margin-top: 10px; padding: 9px 12px; border-radius: var(--radius-sm); font-size: 13px; display: none;
+        }
+        .save-status.ok  { background: var(--emerald-dim); border: 1px solid var(--emerald-border); color: var(--emerald); display: block; }
+        .save-status.err { background: var(--rose-dim);    border: 1px solid var(--rose-border);    color: var(--rose);    display: block; }
 
-        .forged {
-            color: #ff8c8c;
-            font-weight: 700;
+        /* Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px); z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s;
         }
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 24px; box-shadow: var(--shadow-lg);
+            max-width: 940px; width: 100%; max-height: 88vh;
+            overflow-y: auto; padding: 32px;
+            transform: translateY(20px); transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal { transform: translateY(0); }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid var(--border);
+        }
+        .modal-header h2 { margin: 0; font-size: 22px; font-weight: 700; }
+        .modal-close {
+            width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border);
+            background: var(--surface-2); color: var(--text); font-size: 16px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+        }
+        .modal-close:hover { background: var(--surface-3); }
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+        .chart-box {
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 18px;
+        }
+        .chart-box h4 { margin: 0 0 12px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+        .chart-box canvas { max-height: 210px; }
+        .report-label { font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+        .print-btn {
+            margin-top: 20px; padding: 10px 18px; border: none; border-radius: var(--radius-sm);
+            background: var(--violet-dim); border: 1px solid var(--violet-border);
+            color: var(--violet); font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .print-btn:hover { background: rgba(139,92,246,0.25); }
 
-        .genuine {
-            color: #7ff0b0;
-            font-weight: 700;
-        }
-
-        .unknown {
-            color: #ffd166;
-            font-weight: 700;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s ease;
-        }
-
-        .btn.flag {
-            color: white;
-            background: linear-gradient(90deg, #f59e0b, #f97316);
-        }
-
-        .btn.flag:hover {
-            transform: translateY(-1px);
-            opacity: 0.95;
-        }
-
-        .btn.flag.flagged {
-            background: linear-gradient(90deg, #16a34a, #22c55e);
-        }
-
-        .btn.flag.loading {
-            opacity: 0.8;
-            cursor: wait;
-        }
-
-        .flag-id {
-            margin-top: 6px;
-            font-size: 12px;
-            color: #c7d2e8;
-        }
-
-        .back {
-            display: inline-block;
-            margin-top: 22px;
-            text-decoration: none;
-            color: #dbe7ff;
-            background: rgba(255,255,255,0.08);
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-
-        .back:hover {
-            background: rgba(255,255,255,0.12);
-        }
-
-        @media (max-width: 900px) {
-            body { padding: 18px; }
-            .topbar h1 { font-size: 28px; }
-            table { font-size: 12px; }
-            th, td { padding: 10px 8px; }
-        }
+        @media (max-width: 1024px) { .result-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 680px)  { .chart-row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <section class="topbar">
-            <h1>Forgery Detection Results</h1>
-            <p>Review annotated attendance pages, inspect similarity scores, and toggle flagged signatures when needed.</p>
-        </section>
-
-        {% if pages %}
-            {% for page_path in pages %}
-                <div class="page-block">
-                    <h3>Annotated Attendance Page {{ loop.index }}</h3>
-                    <img src="{{ page_path }}" alt="Attendance Page {{ loop.index }}">
-                </div>
-            {% endfor %}
-        {% endif %}
-
-        <section class="table-panel">
-            <h3>Signature Scores</h3>
-
-            <table>
-                <tr>
-                    <th>Page</th>
-                    <th>Row</th>
-                    <th>Student ID</th>
-                    <th>CNN</th>
-                    <th>HOG</th>
-                    <th>Hybrid</th>
-                    <th>Decision</th>
-                    <th>Flag</th>
-                </tr>
-
-                {% for r in results %}
-                    {% set page_value = r.page if r.page is defined and r.page not in [None, ''] else (r.page_number if r.page_number is defined else '-') %}
-                    {% set row_value = r.row if r.row is defined and r.row not in [None, ''] else (r.row_index if r.row_index is defined else '-') %}
-                    {% set student_id_value = r.student_id if r.student_id is defined and r.student_id not in [None, ''] else '-' %}
-                    {% set cnn_value = r.cnn if r.cnn is defined and r.cnn not in [None, ''] else '-' %}
-                    {% set hog_value = r.hog if r.hog is defined and r.hog not in [None, ''] else '-' %}
-                    {% set hybrid_value = r.hybrid if r.hybrid is defined and r.hybrid not in [None, ''] else '-' %}
-                    {% set decision_value = r.label if r.label is defined and r.label not in [None, ''] else (r.decision if r.decision is defined and r.decision not in [None, ''] else 'UNKNOWN') %}
-
-                    {% set signature_key = r.signature_key if r.signature_key is defined and r.signature_key not in [None, ''] else (page_value|string ~ '_' ~ row_value|string ~ '_' ~ student_id_value|string) %}
-                    {% set composite_key = source_pdf ~ '::' ~ signature_key %}
-                    {% set existing_flag = flagged_map.get(composite_key) %}
-
-                    <tr>
-                        <td>{{ page_value }}</td>
-                        <td>{{ row_value }}</td>
-                        <td>{{ student_id_value }}</td>
-                        <td>{{ cnn_value }}</td>
-                        <td>{{ hog_value }}</td>
-                        <td>{{ hybrid_value }}</td>
-                        <td class="{% if decision_value == 'FORGED' %}forged{% elif decision_value == 'GENUINE' %}genuine{% else %}unknown{% endif %}">
-                            {{ decision_value }}
-                        </td>
-                        <td>
-                            <button
-                                type="button"
-                                class="btn flag {% if existing_flag %}flagged{% endif %}"
-                                id="flag-btn-{{ loop.index0 }}"
-                                onclick="toggleFlagRow(
-                                    '{{ signature_key|e }}',
-                                    '{{ student_id_value|e }}',
-                                    '',
-                                    '{{ row_value }}',
-                                    '{{ page_value }}',
-                                    '{{ source_pdf if source_pdf else '' }}',
-                                    'flag-btn-{{ loop.index0 }}',
-                                    'flag-id-{{ loop.index0 }}'
-                                )"
-                            >
-                                {% if existing_flag %}Flagged{% else %}⚑ Flag{% endif %}
-                            </button>
-
-                            <div class="flag-id" id="flag-id-{{ loop.index0 }}">
-                                {% if existing_flag %}{{ existing_flag }}{% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-
-            <a class="back" href="{{ url_for('dashboard') }}">← Back to Dashboard</a>
-        </section>
+<header class="mobile-header">
+    <div class="sb-logo">
+        <div class="sb-logo-mark" style="width:28px;height:28px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <span class="sb-logo-text">FASDA</span>
     </div>
+    <button id="hamburger" class="hamburger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+</header>
 
-    <script>
-        async function toggleFlagRow(signatureKey, studentId, studentName, rowIndex, pageNumber, sourcePdf, btnId, flagIdId) {
-            const btn = document.getElementById(btnId);
-            const flagIdBox = document.getElementById(flagIdId);
+<div class="app-shell">
+    <nav class="sidebar">
+        <div class="sb-header">
+            <div class="sb-logo">
+                <div class="sb-logo-mark">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <span class="sb-logo-text">FASDA</span>
+            </div>
+        </div>
+        <div class="sb-nav">
+            <a href="/dashboard" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </a>
+            {% if role != 'admin' %}
+            <a href="/verify" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                Verify Signature
+            </a>
+            <a href="/attendance" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Attendance
+            </a>
+            {% endif %}
+            {% if role == 'admin' %}
+            <div class="sb-divider"></div>
+            <a href="/admin" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Admin Panel
+            </a>
+            <a href="/plots" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Distribution Plots
+            </a>
+            <a href="/benchmark" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Benchmark
+            </a>
+            {% endif %}
+        </div>
+        <div class="sb-footer">
+            <a href="/profile" class="sb-user">
+                <div class="sb-avatar {% if role == 'admin' %}admin{% endif %}">{{ (display_name or 'U')[0]|upper }}</div>
+                <div>
+                    <div class="sb-user-name">{{ display_name }}</div>
+                    <div class="sb-user-role">{{ 'Administrator' if role == 'admin' else 'User' }}</div>
+                </div>
+            </a>
+            <a href="/logout" class="sb-logout" title="Logout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </a>
+        </div>
+    </nav>
 
-            if (!btn || btn.classList.contains("loading")) return;
+    <main class="app-main">
+        <div class="page-header anim-down">
+            <div>
+                <div class="page-title">Forgery Detection Results</div>
+                <div class="page-desc">Review annotated attendance pages and inspect signature scores grouped by student ID. Generate a full report below.</div>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-primary btn-sm" onclick="openReport()">Generate Report</button>
+                <a href="/dashboard" class="btn btn-ghost btn-sm">← Dashboard</a>
+            </div>
+        </div>
 
-            const oldText = btn.innerText;
-            btn.classList.add("loading");
-            btn.innerText = "Processing...";
+        <div class="result-layout">
+            
+            <div class="pages-col anim-up">
+                <div class="pages-header">
+                    <h3>Annotated Pages</h3>
+                    <span>{{ pages | length }} page{{ 's' if pages | length != 1 else '' }}</span>
+                </div>
+                {% if pages %}
+                    {% for page_path in pages %}
+                    <div class="page-card" style="animation:fadeUp 0.5s ease both;animation-delay:{{ loop.index0 * 0.06 }}s;">
+                        <h4>Page {{ loop.index }}</h4>
+                        <img src="{{ page_path }}" alt="Annotated Attendance Page {{ loop.index }}">
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="page-card">
+                    <p style="color:var(--text-muted);margin:20px 0;">No annotated pages available.</p>
+                </div>
+                {% endif %}
+            </div>
 
-            try {
-                const response = await fetch("/attendance/flag", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        signature_key: signatureKey,
-                        student_id: studentId,
-                        student_name: studentName,
-                        row_index: rowIndex,
-                        page_number: pageNumber,
-                        source_pdf: sourcePdf,
-                        note: ""
-                    })
-                });
+            
+            <div class="students-col anim-up" style="animation-delay:0.08s;">
+                <div class="students-header">
+                    <h3>Students by ID</h3>
+                    <span class="badge count-badge">{{ grouped_results | length }} student{{ 's' if grouped_results | length != 1 else '' }}</span>
+                </div>
 
-                const data = await response.json();
+                {% if grouped_results %}
+                    {% for student_id, entries in grouped_results.items() %}
+                        {% set ns = namespace(genuine=0, forged=0, unknown=0) %}
+                        {% for e in entries %}
+                            {% set dec = (e.label if e.label is defined and e.label not in [None,''] else (e.decision if e.decision is defined and e.decision not in [None,''] else 'UNKNOWN')) | upper %}
+                            {% if dec == 'GENUINE' %}{% set ns.genuine = ns.genuine + 1 %}
+                            {% elif dec == 'FORGED' %}{% set ns.forged = ns.forged + 1 %}
+                            {% else %}{% set ns.unknown = ns.unknown + 1 %}{% endif %}
+                        {% endfor %}
 
-                if (data.success) {
-                    if (data.action === "flagged") {
-                        btn.classList.add("flagged");
-                        btn.innerText = "Flagged";
-                        if (flagIdBox) flagIdBox.innerText = data.flag_id || "";
-                    } else if (data.action === "unflagged") {
-                        btn.classList.remove("flagged");
-                        btn.innerText = "⚑ Flag";
-                        if (flagIdBox) flagIdBox.innerText = "";
-                    } else {
-                        btn.innerText = oldText;
-                        alert("Unknown flag response.");
-                    }
-                } else {
-                    btn.innerText = oldText;
-                    alert(data.error || "Flag action failed.");
-                }
-            } catch (err) {
-                btn.innerText = oldText;
-                alert("Network error while changing flag state.");
-            } finally {
-                btn.classList.remove("loading");
-            }
+                    <div class="student-group" id="group-{{ loop.index }}" style="animation:fadeUp 0.5s ease both;animation-delay:{{ loop.index0 * 0.05 }}s;">
+                        <div class="student-header" onclick="toggleGroup('group-{{ loop.index }}')">
+                            <div class="student-id-row">
+                                <span class="student-id-badge">ID: {{ student_id }}</span>
+                                <div class="student-summary">
+                                    {% if ns.genuine > 0 %}<span class="summary-pill pill-genuine">{{ ns.genuine }} Genuine</span>{% endif %}
+                                    {% if ns.forged  > 0 %}<span class="summary-pill pill-forged">{{ ns.forged }} Forged</span>{% endif %}
+                                    {% if ns.unknown > 0 %}<span class="summary-pill pill-unknown">{{ ns.unknown }} Unknown</span>{% endif %}
+                                </div>
+                            </div>
+                            <span class="chevron">▼</span>
+                        </div>
+
+                        <div class="student-body">
+                            <table class="sig-table">
+                                <thead>
+                                    <tr>
+                                        <th>Page</th>
+                                        <th>Row</th>
+                                        <th>CNN</th>
+                                        <th>HOG</th>
+                                        <th>Hybrid</th>
+                                        <th>Decision</th>
+                                        <th>Flag</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for r in entries %}
+                                        {% set page_v = r.page if r.page is defined and r.page not in [None,''] else (r.page_number if r.page_number is defined else '-') %}
+                                        {% set row_v  = r.row  if r.row  is defined and r.row  not in [None,''] else (r.row_index  if r.row_index  is defined else '-') %}
+                                        {% set cnn_v  = r.cnn  if r.cnn  is defined and r.cnn  not in [None,''] else '-' %}
+                                        {% set hog_v  = r.hog  if r.hog  is defined and r.hog  not in [None,''] else '-' %}
+                                        {% set hyb_v  = r.hybrid if r.hybrid is defined and r.hybrid not in [None,''] else '-' %}
+                                        {% set dec_v  = (r.label if r.label is defined and r.label not in [None,''] else (r.decision if r.decision is defined and r.decision not in [None,''] else 'UNKNOWN')) | upper %}
+                                        {% set sig_key = r.signature_key if r.signature_key is defined and r.signature_key not in [None,''] else (page_v|string ~ '_' ~ row_v|string ~ '_' ~ student_id|string) %}
+                                        {% set comp_key = source_pdf ~ '::' ~ sig_key %}
+                                        {% set existing_flag = flagged_map.get(comp_key) %}
+                                        {% set btn_id = 'fg-' ~ loop.index0 ~ '-' ~ student_id %}
+                                        {% set fid_id = 'fi-' ~ loop.index0 ~ '-' ~ student_id %}
+                                    <tr>
+                                        <td>{{ page_v }}</td>
+                                        <td>{{ row_v }}</td>
+                                        <td>{{ cnn_v }}</td>
+                                        <td>{{ hog_v }}</td>
+                                        <td>{{ hyb_v }}</td>
+                                        <td class="{% if dec_v == 'FORGED' %}decision-forged{% elif dec_v == 'GENUINE' %}decision-genuine{% else %}decision-unknown{% endif %}">
+                                            {{ dec_v }}
+                                        </td>
+                                        <td>
+                                            <button
+                                                class="flag-btn {% if existing_flag %}flagged{% endif %}"
+                                                id="{{ btn_id }}"
+                                                type="button"
+                                                onclick="toggleFlagRow('{{ sig_key|e }}','{{ student_id|e }}','','{{ row_v }}','{{ page_v }}','{{ source_pdf if source_pdf else '' }}','{{ btn_id }}','{{ fid_id }}')"
+                                            >{% if existing_flag %}Flagged{% else %}⚑ Flag{% endif %}</button>
+                                            <div class="flag-code" id="{{ fid_id }}">{% if existing_flag %}{{ existing_flag }}{% endif %}</div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="card">
+                    <div class="empty-state">No results to display.</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+
+
+<div class="modal-overlay" id="reportModal" onclick="closeReportOnBg(event)">
+    <div class="modal" id="reportModalContent">
+        <div class="modal-header">
+            <h2>Attendance Report</h2>
+            <button class="modal-close" onclick="closeReport()">✕</button>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-box">
+                <h4>Overall Signature Distribution</h4>
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="chart-box">
+                <h4>Genuine vs Forged per Student</h4>
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <div class="report-label">Students — ordered by forgery rate (worst first)</div>
+            <table class="table" id="reportTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student ID</th>
+                        <th>Total</th>
+                        <th>Genuine</th>
+                        <th>Forged</th>
+                        <th>Forgery Rate</th>
+                        <th>Visual</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="save-section">
+            <h4>Save this report</h4>
+            <div class="save-row">
+                <div class="save-input-wrap">
+                    <label for="courseInput">Course code / folder name</label>
+                    <input id="courseInput" class="save-input" type="text"
+                           placeholder="e.g. CNG 213  (leave blank for Untitled)">
+                </div>
+                <button class="btn-save" id="saveReportBtn" onclick="saveReport()">Save Report</button>
+            </div>
+            <div id="existingFolders" class="existing-folders"></div>
+            <div id="saveStatus" class="save-status"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            <button class="print-btn" onclick="window.print()">Print Report</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    function toggleGroup(id) {
+        document.getElementById(id).classList.toggle('open');
+    }
+
+    async function toggleFlagRow(sigKey, studentId, studentName, rowIndex, pageNumber, sourcePdf, btnId, flagIdId) {
+        const btn = document.getElementById(btnId);
+        const fidBox = document.getElementById(flagIdId);
+        if (!btn || btn.classList.contains('loading')) return;
+        const oldText = btn.innerText;
+        btn.classList.add('loading'); btn.innerText = '...';
+        try {
+            const res = await fetch('/attendance/flag', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ signature_key: sigKey, student_id: studentId, student_name: studentName, row_index: rowIndex, page_number: pageNumber, source_pdf: sourcePdf, note: '' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (data.action === 'flagged') { btn.classList.add('flagged'); btn.innerText = 'Flagged'; if (fidBox) fidBox.innerText = data.flag_id || ''; }
+                else { btn.classList.remove('flagged'); btn.innerText = '⚑ Flag'; if (fidBox) fidBox.innerText = ''; }
+            } else { btn.innerText = oldText; }
+        } catch { btn.innerText = oldText; }
+        finally { btn.classList.remove('loading'); }
+    }
+
+    const rawResults = {{ results_json | safe }};
+    const sourcePdfName = {{ (source_pdf or '') | tojson }};
+    let pieChartInst = null, barChartInst = null;
+    let _reportSorted = [], _reportTotals = {};
+
+    function buildReportData() {
+        const students = {};
+        let totalGenuine = 0, totalForged = 0, totalUnknown = 0;
+        for (const r of rawResults) {
+            const sid = ((r.student_id || '') + '').trim() || 'Unknown';
+            if (!students[sid]) students[sid] = { genuine: 0, forged: 0, unknown: 0 };
+            const dec = ((r.label || r.decision || 'UNKNOWN') + '').toUpperCase();
+            if (dec === 'GENUINE')      { students[sid].genuine++; totalGenuine++; }
+            else if (dec === 'FORGED')  { students[sid].forged++;  totalForged++; }
+            else                        { students[sid].unknown++; totalUnknown++; }
         }
-    </script>
+        const sorted = Object.entries(students).sort((a, b) => {
+            const ta = a[1].genuine + a[1].forged + a[1].unknown;
+            const tb = b[1].genuine + b[1].forged + b[1].unknown;
+            return (tb > 0 ? b[1].forged / tb : 0) - (ta > 0 ? a[1].forged / ta : 0);
+        });
+        _reportSorted = sorted;
+        _reportTotals = { totalGenuine, totalForged, totalUnknown };
+        return { students, sorted, totalGenuine, totalForged, totalUnknown };
+    }
+
+    async function openReport() {
+        document.getElementById('reportModal').classList.add('visible');
+        document.getElementById('saveStatus').className = 'save-status';
+        document.getElementById('saveStatus').textContent = '';
+        const { sorted, totalGenuine, totalForged, totalUnknown } = buildReportData();
+        if (pieChartInst) pieChartInst.destroy();
+        pieChartInst = new Chart(document.getElementById('pieChart').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Genuine', 'Forged', 'Unknown'],
+                datasets: [{ data: [totalGenuine, totalForged, totalUnknown],
+                    backgroundColor: ['rgba(16,185,129,0.75)','rgba(244,63,94,0.75)','rgba(245,158,11,0.7)'],
+                    borderColor: ['#10b981','#f43f5e','#f59e0b'], borderWidth: 2 }]
+            },
+            options: { plugins: { legend: { labels: { color: '#e2eaf8', font: { size: 12 } } } }, cutout: '60%' }
+        });
+        if (barChartInst) barChartInst.destroy();
+        barChartInst = new Chart(document.getElementById('barChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: sorted.map(([s]) => 'ID ' + s),
+                datasets: [
+                    { label: 'Genuine', data: sorted.map(([,v]) => v.genuine), backgroundColor: 'rgba(16,185,129,0.7)', borderColor: '#10b981', borderWidth: 1 },
+                    { label: 'Forged',  data: sorted.map(([,v]) => v.forged),  backgroundColor: 'rgba(244,63,94,0.7)', borderColor: '#f43f5e',  borderWidth: 1 }
+                ]
+            },
+            options: {
+                plugins: { legend: { labels: { color: '#e2eaf8', font: { size: 12 } } } },
+                scales: {
+                    x: { ticks: { color: '#6b7a9a', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    y: { ticks: { color: '#6b7a9a' }, grid: { color: 'rgba(255,255,255,0.07)' }, beginAtZero: true }
+                }
+            }
+        });
+        const tbody = document.getElementById('reportTableBody');
+        tbody.innerHTML = '';
+        sorted.forEach(([sid, v], i) => {
+            const total = v.genuine + v.forged + v.unknown;
+            const pct = total > 0 ? (v.forged / total * 100) : 0;
+            const pctColor = pct >= 50 ? '#f43f5e' : pct >= 20 ? '#f59e0b' : '#10b981';
+            const tdS = 'padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06);';
+            tbody.innerHTML += `<tr>
+                <td style="${tdS}color:var(--text-muted)">${i + 1}</td>
+                <td style="${tdS}"><strong>${sid}</strong></td>
+                <td style="${tdS}">${total}</td>
+                <td style="${tdS}color:#10b981">${v.genuine}</td>
+                <td style="${tdS}color:#f43f5e">${v.forged}</td>
+                <td style="${tdS}font-weight:700;color:${pctColor}">${pct.toFixed(1)}%</td>
+                <td style="${tdS}">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.07);overflow:hidden;">
+                            <div style="height:100%;border-radius:3px;background:${pctColor};width:${pct}%;transition:width .6s ease;"></div>
+                        </div>
+                    </div>
+                </td>
+            </tr>`;
+        });
+        loadFolderChips();
+    }
+
+    async function loadFolderChips() {
+        const container = document.getElementById('existingFolders');
+        container.innerHTML = '<span style="font-size:12px;color:var(--text-muted);">Loading folders…</span>';
+        try {
+            const res = await fetch('/reports/folders');
+            const folders = await res.json();
+            if (!folders.length) { container.innerHTML = ''; return; }
+            container.innerHTML = '<span style="font-size:12px;color:var(--text-muted);margin-right:4px;">Existing folders:</span>';
+            folders.forEach(f => {
+                const chip = document.createElement('button');
+                chip.className = 'folder-chip';
+                chip.textContent = f.display;
+                chip.onclick = () => selectFolder(chip, f.display);
+                container.appendChild(chip);
+            });
+        } catch { container.innerHTML = ''; }
+    }
+
+    function selectFolder(chip, displayName) {
+        document.querySelectorAll('.folder-chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        document.getElementById('courseInput').value = displayName;
+    }
+
+    async function saveReport() {
+        const btn = document.getElementById('saveReportBtn');
+        const status = document.getElementById('saveStatus');
+        const course = document.getElementById('courseInput').value.trim();
+        btn.disabled = true; btn.textContent = 'Saving…'; status.className = 'save-status';
+        const { totalGenuine, totalForged, totalUnknown } = _reportTotals;
+        const summary = { total: rawResults.length, genuine: totalGenuine, forged: totalForged, unknown: totalUnknown };
+        try {
+            const res = await fetch('/reports/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ course, source_pdf: sourcePdfName, summary, results: rawResults })
+            });
+            const data = await res.json();
+            if (data.success) {
+                status.className = 'save-status ok';
+                status.innerHTML = `Saved to <strong>${data.display_course}</strong> folder. <a href="/reports/${data.slug}" style="color:inherit;font-weight:700;">View all reports →</a>`;
+                loadFolderChips();
+            } else { throw new Error(data.error || 'Save failed'); }
+        } catch (err) {
+            status.className = 'save-status err';
+            status.textContent = 'Error: ' + err.message;
+        } finally { btn.disabled = false; btn.textContent = 'Save Report'; }
+    }
+
+    function closeReport() { document.getElementById('reportModal').classList.remove('visible'); }
+    function closeReportOnBg(e) { if (e.target === document.getElementById('reportModal')) closeReport(); }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeReport(); });
+</script>
+
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150;" class=""></div>
+<button id="theme-toggle" onclick="_fasdaToggleTheme()" title="Toggle theme">☀️</button>
+<script src="/static/theme.js"></script>
 </body>
 </html>

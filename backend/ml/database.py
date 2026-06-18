@@ -2,9 +2,6 @@ import psycopg2
 from datetime import datetime
 from config import PG_HOST, PG_PORT, PG_DATABASE, PG_USER, PG_PASSWORD
 
-# =========================================================
-# POSTGRESQL CONNECTION
-# =========================================================
 def get_conn():
     return psycopg2.connect(
         host=PG_HOST,
@@ -13,7 +10,6 @@ def get_conn():
         user=PG_USER,
         password=PG_PASSWORD
     )
-
 
 def init_db():
     conn = get_conn()
@@ -33,7 +29,6 @@ def init_db():
     conn.commit()
     cur.close()
     conn.close()
-
 
 def log_result(student_id, test_image, label, cnn, hog, hybrid):
     conn = get_conn()

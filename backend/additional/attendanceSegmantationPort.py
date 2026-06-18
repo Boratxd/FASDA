@@ -13,7 +13,7 @@ ATTENDANCE_DIR = os.path.join(STATIC_DIR, "attendance")
 
 OUTPUT_DIR = os.path.join(ATTENDANCE_DIR, "cropped_signatures")
 TEMP_DIR = os.path.join(ATTENDANCE_DIR, "rendered_pages")
-OCR_DEBUG_DIR = os.path.join(ATTENDANCE_DIR, "ocr_debug")
+OCR_DEBUG_DIR = os.path.join(OUTPUT_DIR, "ocr_debug")
 
 STUDENT_MAP_FILE = os.path.join(ATTENDANCE_DIR, "student_map.csv")
 METADATA_CSV = os.path.join(ATTENDANCE_DIR, "signatures_metadata.csv")
@@ -23,11 +23,10 @@ FORCE_REBUILD_STUDENT_MAP = True
 COURSE_NAME = "CNG213"
 ATTENDANCE_SHEET_ID = "AS001"
 
-ID_COLUMN_INDEX = 0
+ID_COLUMN_INDEX = 1
 FIRST_SIGNATURE_CELL_INDEX = 3
-OCR_DEBUG_DIR = os.path.join(OUTPUT_DIR, "ocr_debug")
 
-EXPECTED_ID_LENGTHS = {7, 8}
+EXPECTED_ID_LENGTHS = {3}
 MIN_FILLED_RATIO = 0.7
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -36,15 +35,31 @@ os.makedirs(OCR_DEBUG_DIR, exist_ok=True)
 
 reader = easyocr.Reader(['en'], gpu=False)
 
-
 def clean_filename(text):
     return re.sub(r"[^A-Za-z0-9_-]", "", str(text).strip())
-
 
 def looks_like_student_id(text):
     text = re.sub(r"\D", "", str(text))
     return len(text) in EXPECTED_ID_LENGTHS
 
+def synthetic_id_from_global_row(global_row_number):
+    return str(global_row_number).zfill(3)
+
+def ensure_metadata_file():
+    if not os.path.exists(METADATA_CSV):
+        with open(METADATA_CSV, "w", newline="", encoding="utf-8-sig") as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "file_name",
+                "student_id",
+                "course_name",
+                "attendance_sheet_id",
+                "page",
+                "row",
+                "cell_index",
+                "x",
+                "y"
+            ])
 
 def render_page_to_image(page, zoom=2.0):
     mat = fitz.Matrix(zoom, zoom)
@@ -53,7 +68,6 @@ def render_page_to_image(page, zoom=2.0):
     pix.save(img_path)
     img = cv2.imread(img_path)
     return img, zoom
-
 
 def is_highlighted_absent(cell_img):
     hsv = cv2.cvtColor(cell_img, cv2.COLOR_BGR2HSV)
@@ -71,7 +85,6 @@ def is_highlighted_absent(cell_img):
     ratio = np.sum(mask > 0) / (cell_img.shape[0] * cell_img.shape[1])
 
     return ratio > 0.03
-
 
 def signature_ink_ratio_excluding_highlight(cell_img):
     hsv = cv2.cvtColor(cell_img, cv2.COLOR_BGR2HSV)
@@ -103,7 +116,6 @@ def signature_ink_ratio_excluding_highlight(cell_img):
 
     return ink_pixels / total_pixels
 
-
 def group_rows(cells, y_tolerance=20):
     rows = []
     for cell in sorted(cells, key=lambda b: (b[1], b[0])):
@@ -126,7 +138,6 @@ def group_rows(cells, y_tolerance=20):
     rows.sort(key=lambda r: r[0][1])
     return rows
 
-
 def detect_rows(img):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -145,19 +156,18 @@ def detect_rows(img):
     cells = []
     for cnt in contours:
         x, y, w, h = cv2.boundingRect(cnt)
-        if 100 < w < 350 and 40 < h < 120:
+        if 80 < w < 420 and 35 < h < 140:
             cells.append((x, y, w, h))
 
     rows = group_rows(cells, y_tolerance=20)
 
     filtered_rows = []
     for row in rows:
-        if len(row) < max(5, FIRST_SIGNATURE_CELL_INDEX + 1):
+        if len(row) < max(6, FIRST_SIGNATURE_CELL_INDEX + 1):
             continue
         filtered_rows.append(row)
 
     return filtered_rows
-
 
 def preprocess_id_variants(cell_img):
     gray = cv2.cvtColor(cell_img, cv2.COLOR_BGR2GRAY)
@@ -192,14 +202,13 @@ def preprocess_id_variants(cell_img):
 
     return out
 
-
 def pick_best_id(texts):
     candidates = []
 
     for txt in texts:
         txt = re.sub(r"\D", "", txt)
         if len(txt) in EXPECTED_ID_LENGTHS:
-            candidates.append(txt)
+            candidates.append(txt.zfill(3))
 
     if not candidates:
         return None
@@ -210,7 +219,6 @@ def pick_best_id(texts):
 
     best = sorted(freq.items(), key=lambda x: (-x[1], x[0]))[0][0]
     return best
-
 
 def extract_student_id_from_cell(cell_img, debug_tag):
     raw_path = os.path.join(OCR_DEBUG_DIR, f"{debug_tag}_raw.png")
@@ -232,9 +240,7 @@ def extract_student_id_from_cell(cell_img, debug_tag):
         if results:
             ocr_texts.extend(results)
 
-    best = pick_best_id(ocr_texts)
-    return best
-
+    return pick_best_id(ocr_texts)
 
 def create_student_map_from_ocr(pdf_path, out_csv=STUDENT_MAP_FILE):
     doc = fitz.open(pdf_path)
@@ -251,42 +257,27 @@ def create_student_map_from_ocr(pdf_path, out_csv=STUDENT_MAP_FILE):
             rows = detect_rows(img)
 
             for row in rows:
-                student_id = ""
+                global_row_counter += 1
+
+                student_id = synthetic_id_from_global_row(global_row_counter)
 
                 if len(row) > ID_COLUMN_INDEX:
                     x_id, y_id, w_id, h_id = row[ID_COLUMN_INDEX]
                     id_crop = img[y_id:y_id + h_id, x_id:x_id + w_id]
                     id_crop = id_crop[5:h_id - 5, 5:w_id - 5]
-
                     if id_crop.size > 0:
-                        student_id = extract_student_id_from_cell(
+                        _ = extract_student_id_from_cell(
                             id_crop,
-                            f"page{i+1}_candidate{global_row_counter+1}"
-                        ) or ""
+                            f"page{i+1}_candidate{global_row_counter}"
+                        )
 
-                if not looks_like_student_id(student_id):
-                    continue
-
-                global_row_counter += 1
                 detected_count += 1
                 writer.writerow([global_row_counter, student_id])
 
     doc.close()
 
-    print(f"OCR-based map created: {out_csv}")
-    print(f"Detected IDs: {detected_count}/{global_row_counter}")
-
-    fill_ratio = detected_count / max(global_row_counter, 1)
-    if fill_ratio < MIN_FILLED_RATIO:
-        print("WARNING: OCR quality is poor.")
-        print("Possible reasons:")
-        print("- ID_COLUMN_INDEX is wrong")
-        print("- OCR crop is noisy")
-        print("- Student IDs have a different length than expected")
-        print("- The row detection order is off")
-
-    print("Check cropped_signatures/ocr_debug/ to verify raw ID-cell crops.")
-
+    print(f"Student map created: {out_csv}")
+    print(f"Detected table rows: {detected_count}")
 
 def load_student_map(csv_path):
     if not os.path.exists(csv_path):
@@ -308,7 +299,6 @@ def load_student_map(csv_path):
                 mapping[global_row] = student_id
 
     return mapping
-
 
 def append_metadata(file_path, student_id, page_number, row_number, cell_index, x, y):
     file_exists = os.path.exists(METADATA_CSV)
@@ -341,45 +331,22 @@ def append_metadata(file_path, student_id, page_number, row_number, cell_index, 
             y
         ])
 
-
 def process_page(page, page_number, student_map, global_row_counter):
-    img, zoom = render_page_to_image(page, zoom=2.0)
+    img, _ = render_page_to_image(page, zoom=2.0)
     debug = img.copy()
 
     rows = detect_rows(img)
     exported = 0
+    used_on_page = 0
 
     for local_row_idx, row in enumerate(rows):
-        row_student_id = None
-
-        if len(row) > ID_COLUMN_INDEX:
-            x_id, y_id, w_id, h_id = row[ID_COLUMN_INDEX]
-            id_crop = img[y_id:y_id + h_id, x_id:x_id + w_id]
-            id_crop = id_crop[5:h_id - 5, 5:w_id - 5]
-
-            if id_crop.size > 0:
-                row_student_id = extract_student_id_from_cell(
-                    id_crop,
-                    f"page{page_number}_row{local_row_idx+1}"
-                )
-
-        if not looks_like_student_id(row_student_id):
-            continue
-
         global_row_counter += 1
-        student_id = student_map.get(global_row_counter, row_student_id)
+        used_on_page += 1
 
-        for idx, (cx, cy, cw, ch) in enumerate(row):
-            cv2.rectangle(debug, (cx, cy), (cx + cw, cy + ch), (0, 255, 255), 1)
-            cv2.putText(
-                debug,
-                str(idx),
-                (cx + 5, cy + 18),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.45,
-                (0, 0, 255),
-                1
-            )
+        student_id = student_map.get(
+            global_row_counter,
+            synthetic_id_from_global_row(global_row_counter)
+        )
 
         for cell_index, (x, y, w, h) in enumerate(row):
             if cell_index < FIRST_SIGNATURE_CELL_INDEX:
@@ -404,7 +371,7 @@ def process_page(page, page_number, student_map, global_row_counter):
                     f"{clean_filename(COURSE_NAME)}_"
                     f"{clean_filename(student_id)}_"
                     f"{clean_filename(ATTENDANCE_SHEET_ID)}_"
-                    f"p{page_number}_r{global_row_counter}_c{cell_index}"
+                    f"p{page_number}_r{global_row_counter}_sig{cell_index - FIRST_SIGNATURE_CELL_INDEX + 1}"
                 )
 
                 save_path = os.path.join(student_folder, f"{base_name}.png")
@@ -424,56 +391,33 @@ def process_page(page, page_number, student_map, global_row_counter):
                 exported += 1
                 cv2.rectangle(debug, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-        first_x, first_y, _, _ = row[0]
         cv2.putText(
             debug,
             str(student_id),
-            (first_x, max(20, first_y - 5)),
+            (row[0][0], max(20, row[0][1] - 5)),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.6,
             (255, 0, 0),
             2
         )
 
-        if len(row) > ID_COLUMN_INDEX:
-            x_id, y_id, w_id, h_id = row[ID_COLUMN_INDEX]
-            cv2.rectangle(debug, (x_id, y_id), (x_id + w_id, y_id + h_id), (255, 0, 0), 2)
-
     debug_path = os.path.join(OUTPUT_DIR, f"debug_page_{page_number}.jpg")
     cv2.imwrite(debug_path, debug)
 
-    print(f"[Page {page_number}] Data rows used: {global_row_counter}")
+    print(f"[Page {page_number}] Data rows used: {used_on_page}")
     print(f"[Page {page_number}] Exported signatures: {exported}")
 
     return global_row_counter
 
-
 def count_total_rows(pdf_path):
     doc = fitz.open(pdf_path)
     total = 0
+
     for i in range(len(doc)):
         page = doc.load_page(i)
         img, _ = render_page_to_image(page, zoom=2.0)
         rows = detect_rows(img)
-
-        for row in rows:
-            if len(row) <= ID_COLUMN_INDEX:
-                continue
-
-            x_id, y_id, w_id, h_id = row[ID_COLUMN_INDEX]
-            id_crop = img[y_id:y_id + h_id, x_id:x_id + w_id]
-            id_crop = id_crop[5:h_id - 5, 5:w_id - 5]
-
-            if id_crop.size == 0:
-                continue
-
-            row_student_id = extract_student_id_from_cell(
-                id_crop,
-                f"count_page{i+1}_{total+1}"
-            )
-
-            if looks_like_student_id(row_student_id):
-                total += 1
+        total += len(rows)
 
     doc.close()
     return total
@@ -482,15 +426,18 @@ def process_attendance_pdf(pdf_path):
     global PDF_PATH
     PDF_PATH = pdf_path
 
+    ensure_metadata_file()
+
     total_rows = count_total_rows(PDF_PATH)
 
     if FORCE_REBUILD_STUDENT_MAP or not os.path.exists(STUDENT_MAP_FILE):
         create_student_map_from_ocr(PDF_PATH, STUDENT_MAP_FILE)
 
-    student_map = load_student_map(STUDENT_MAP_FILE)
+    student_map = load_student_map(STUDENT_MAP_FILE) or {}
 
     if os.path.exists(METADATA_CSV):
         os.remove(METADATA_CSV)
+    ensure_metadata_file()
 
     doc = fitz.open(PDF_PATH)
     global_row_counter = 0
@@ -503,30 +450,29 @@ def process_attendance_pdf(pdf_path):
 
     return {
         "output_dir": OUTPUT_DIR,
-        "metadata_csv": METADATA_CSV
+        "metadata_csv": METADATA_CSV,
+        "detected_rows": total_rows
     }
-
 
 def main():
     total_rows = count_total_rows(PDF_PATH)
     print("Expected total student rows:", total_rows)
 
     if FORCE_REBUILD_STUDENT_MAP or not os.path.exists(STUDENT_MAP_FILE):
-        print("Rebuilding student_map.csv with OCR...")
+        print("Rebuilding student_map.csv...")
         create_student_map_from_ocr(PDF_PATH, STUDENT_MAP_FILE)
 
     student_map = load_student_map(STUDENT_MAP_FILE)
-
     filled = len(student_map) if student_map else 0
     print("Loaded student IDs:", filled)
 
     if filled < max(1, int(total_rows * MIN_FILLED_RATIO)):
         print("student_map.csv is too incomplete.")
-        print("Try changing ID_COLUMN_INDEX or EXPECTED_ID_LENGTHS and rerun.")
         return
 
     if os.path.exists(METADATA_CSV):
         os.remove(METADATA_CSV)
+    ensure_metadata_file()
 
     doc = fitz.open(PDF_PATH)
     global_row_counter = 0
@@ -537,7 +483,6 @@ def main():
 
     doc.close()
     print("Done.")
-
 
 if __name__ == "__main__":
     main()

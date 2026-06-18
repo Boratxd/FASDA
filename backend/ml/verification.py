@@ -7,9 +7,6 @@ from ml.database import log_result
 from ml.cnn_model import load_image
 from ml.hog_features import classical_similarity
 
-# =========================================================
-# VERIFICATION (WITH SQLITE LOGGING)
-# =========================================================
 def verify_signature(model, student_id, user_dir, test_path):
     genuine, _ = extract_user_signatures(user_dir)
     genuine = genuine[:5]

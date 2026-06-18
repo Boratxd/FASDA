@@ -14,10 +14,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 UPLOAD_FOLDER = BASE_DIR / "data" / "uploads"
 ALLOWED_EXTENSIONS = {"pdf"}
 
-
 def allowed_file(filename: str) -> bool:
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 @app.route("/attendance", methods=["GET", "POST"])
 def attendance():
@@ -32,20 +30,9 @@ def attendance():
         filename = secure_filename(pdf_file.filename)
         stored_path = save_uploaded_pdf(pdf_file, filename=filename)
 
-        # burada kendi mevcut attendance pipeline'ınızı çağırın.
-        # örnek:
-        # pages, results = process_attendance_pdf(stored_path)
-        # return render_template(
-        #     "attendance_result.html",
-        #     pages=pages,
-        #     results=results,
-        #     flagged_map=get_flagged_map(),
-        # )
-
         return f"Saved to {stored_path}", 200
 
     return render_template("attendance_upload.html")
-
 
 @app.route("/attendance/flag", methods=["POST"])
 def flag_attendance_row():
@@ -64,7 +51,6 @@ def flag_attendance_row():
         return jsonify({"error": f"Unexpected error: {exc}"}), 500
 
     return jsonify(result), 200
-
 
 @app.route("/attendance/result-demo")
 def attendance_result_demo():
@@ -95,7 +81,6 @@ def attendance_result_demo():
         results=results,
         flagged_map=get_flagged_map(),
     )
-
 
 if __name__ == "__main__":
     app.run(debug=True)

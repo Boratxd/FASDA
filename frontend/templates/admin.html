@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FASDA | Admin Panel</title>
+    <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
+    <link rel="stylesheet" href="/static/fasda.css">
+    <link rel="stylesheet" href="/static/theme.css">
+    <style>
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
+        .card-title  { margin: 0; font-size: 18px; font-weight: 700; color: var(--text); }
+        .card-desc   { margin: 0 0 18px; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+
+        .alpha-form { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+        .alpha-slider-wrap { flex: 1; min-width: 200px; }
+        .alpha-slider-wrap label { display: block; margin-bottom: 8px; font-size: 13px; color: var(--text-muted); }
+        input[type="range"] { width: 100%; accent-color: var(--amber); height: 6px; cursor: pointer; }
+        .alpha-value-box {
+            min-width: 86px; padding: 10px 14px; border-radius: var(--radius);
+            border: 1px solid var(--amber-border); background: var(--amber-dim);
+            color: var(--amber); font-size: 20px; font-weight: 700; text-align: center;
+        }
+        .alpha-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
+
+        .user-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 600;
+            border: 1px solid var(--border); background: var(--surface-2); color: var(--text-muted);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .tab-btn.active { background: var(--violet-dim); border-color: var(--violet-border); color: var(--violet); }
+        .tab-btn:hover:not(.active) { background: var(--surface-3); color: var(--text); }
+
+        .users-table { width: 100%; border-collapse: collapse; }
+        .users-table th, .users-table td {
+            padding: 12px 12px; text-align: left; border-bottom: 1px solid var(--border);
+            font-size: 13px; vertical-align: middle;
+        }
+        .users-table th { background: var(--surface-2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .users-table tr:last-child td { border-bottom: none; }
+        .users-table tr:hover td { background: var(--surface-2); }
+
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 600;
+        }
+        .status-approved { background: var(--emerald-dim); border: 1px solid var(--emerald-border); color: var(--emerald); }
+        .status-pending  { background: var(--amber-dim);   border: 1px solid var(--amber-border);   color: var(--amber); }
+        .status-admin    { background: var(--violet-dim);  border: 1px solid var(--violet-border);  color: var(--violet); }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+        .action-form { display: inline; }
+        .btn-approve, .btn-delete {
+            padding: 6px 12px; border: none; border-radius: 8px;
+            font-size: 11px; font-weight: 700; cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+        .btn-approve { background: var(--emerald-dim); border: 1px solid var(--emerald-border); color: var(--emerald); }
+        .btn-approve:hover { transform: translateY(-1px); opacity: 0.9; }
+        .btn-delete  { background: var(--rose-dim); border: 1px solid var(--rose-border); color: var(--rose); margin-left: 5px; }
+        .btn-delete:hover  { transform: translateY(-1px); opacity: 0.9; }
+        .empty-row td { text-align: center; padding: 28px; color: var(--text-muted); font-size: 13px; }
+        .user-row { transition: opacity 0.2s; }
+        .user-row.hide { display: none; }
+
+        @media (max-width: 860px) {
+            .alpha-form { flex-direction: column; align-items: flex-start; }
+            .users-table th:nth-child(4), .users-table td:nth-child(4) { display: none; }
+        }
+    </style>
+</head>
+<body>
+<header class="mobile-header">
+    <div class="sb-logo">
+        <div class="sb-logo-mark" style="width:28px;height:28px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <span class="sb-logo-text">FASDA</span>
+    </div>
+    <button id="hamburger" class="hamburger">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+</header>
+
+<div class="app-shell">
+    <nav class="sidebar">
+        <div class="sb-header">
+            <div class="sb-logo">
+                <div class="sb-logo-mark">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </div>
+                <span class="sb-logo-text">FASDA</span>
+            </div>
+        </div>
+        <div class="sb-nav">
+            <a href="/dashboard" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </a>
+            <div class="sb-divider"></div>
+            <a href="/admin" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                Admin Panel
+            </a>
+            <a href="/plots" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Distribution Plots
+            </a>
+            <a href="/benchmark" class="sb-link">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Benchmark
+            </a>
+        </div>
+        <div class="sb-footer">
+            <a href="/profile" class="sb-user">
+                <div class="sb-avatar admin">{{ (display_name or 'A')[0]|upper }}</div>
+                <div>
+                    <div class="sb-user-name">{{ display_name }}</div>
+                    <div class="sb-user-role">Administrator</div>
+                </div>
+            </a>
+            <a href="/logout" class="sb-logout" title="Logout">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </a>
+        </div>
+    </nav>
+
+    <main class="app-main">
+        <div class="page-header anim-down">
+            <div>
+                <div class="page-title">Admin Panel</div>
+                <div class="page-desc">Manage users, approve registrations, and adjust model configuration settings.</div>
+            </div>
+            <div class="page-actions">
+                <a href="/dashboard" class="btn btn-ghost btn-sm">← Dashboard</a>
+            </div>
+        </div>
+
+        
+        <section class="card anim-up">
+            <div class="card-header">
+                <h2 class="card-title">Model Weight Configuration</h2>
+                <span class="badge badge-amber">ALPHA Parameter</span>
+            </div>
+            <p class="card-desc">
+                The <strong>ALPHA</strong> value controls the balance between CNN and HOG scores in the hybrid decision.
+                A higher value increases CNN influence; a lower value emphasizes HOG features. Changes are saved to <code>config.py</code> immediately.
+            </p>
+            <form method="POST" action="/admin/update_alpha">
+                <div class="alpha-form">
+                    <div class="alpha-slider-wrap">
+                        <label for="alphaRange">ALPHA — current value: <strong id="alphaLabel">{{ "%.4f" | format(alpha) }}</strong></label>
+                        <input
+                            type="range" id="alphaRange" name="alpha"
+                            min="0" max="1" step="0.0001"
+                            value="{{ alpha }}"
+                            oninput="document.getElementById('alphaLabel').textContent = parseFloat(this.value).toFixed(4); document.getElementById('alphaDisplay').textContent = parseFloat(this.value).toFixed(4);"
+                        >
+                        <div class="alpha-note">Range: 0.0 (full HOG) → 1.0 (full CNN). Recommended: 0.3 – 0.6 for balanced detection.</div>
+                    </div>
+                    <div class="alpha-value-box" id="alphaDisplay">{{ "%.4f" | format(alpha) }}</div>
+                    <button type="submit" class="btn btn-sm" style="background:var(--amber);color:#1a0f00;font-weight:700;">Save ALPHA</button>
+                </div>
+            </form>
+        </section>
+
+        
+        <section class="card anim-up" style="animation-delay:0.06s;">
+            <div class="card-header">
+                <h2 class="card-title">User Management</h2>
+                <span class="badge badge-violet">{{ users | length }} total</span>
+            </div>
+            <p class="card-desc">
+                Review registered users, approve pending accounts, or remove users from the system. Admins cannot be deleted through this panel.
+            </p>
+
+            <div class="user-tabs">
+                <button class="tab-btn active" onclick="filterUsers('all', this)">All Users</button>
+                <button class="tab-btn" onclick="filterUsers('pending', this)">Pending Approval</button>
+                <button class="tab-btn" onclick="filterUsers('approved', this)">Approved</button>
+            </div>
+
+            <div class="table-wrap">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Phone</th>
+                            <th>Joined</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        {% for u in users %}
+                        <tr class="user-row"
+                            data-status="{{ 'admin' if u.role == 'admin' else ('approved' if u.approved else 'pending') }}">
+                            <td>
+                                <strong>{{ (u.first_name or '') + ' ' + (u.last_name or '') | trim or '—' }}</strong>
+                            </td>
+                            <td style="color:var(--text-muted);">{{ u.username }}</td>
+                            <td style="color:var(--text-muted);">{{ u.phone or '—' }}</td>
+                            <td style="color:var(--text-muted); font-size:12px;">
+                                {{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '—' }}
+                            </td>
+                            <td>
+                                {% if u.role == 'admin' %}
+                                <span class="status-badge status-admin"><span class="status-dot"></span>Admin</span>
+                                {% elif u.approved %}
+                                <span class="status-badge status-approved"><span class="status-dot"></span>Approved</span>
+                                {% else %}
+                                <span class="status-badge status-pending"><span class="status-dot"></span>Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if u.role != 'admin' %}
+                                    {% if not u.approved %}
+                                    <form class="action-form" method="POST" action="/admin/approve/{{ u.id }}">
+                                        <button type="submit" class="btn-approve">Approve</button>
+                                    </form>
+                                    {% endif %}
+                                    <form class="action-form" method="POST" action="/admin/delete/{{ u.id }}"
+                                          onsubmit="return confirm('Delete user {{ u.username }}? This cannot be undone.');">
+                                        <button type="submit" class="btn-delete">Delete</button>
+                                    </form>
+                                {% else %}
+                                    <span style="color:var(--text-muted); font-size:12px;">Protected</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr class="empty-row"><td colspan="6">No users found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    function filterUsers(filter, btn) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.user-row').forEach(row => {
+            const status = row.dataset.status;
+            if (filter === 'all') {
+                row.classList.remove('hide');
+            } else if (filter === 'pending') {
+                row.classList.toggle('hide', status !== 'pending');
+            } else if (filter === 'approved') {
+                row.classList.toggle('hide', status !== 'approved' && status !== 'admin');
+            }
+        });
+    }
+</script>
+
+<div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150;" class=""></div>
+<button id="theme-toggle" onclick="_fasdaToggleTheme()" title="Toggle theme">☀️</button>
+<script src="/static/theme.js"></script>
+</body>
+</html>

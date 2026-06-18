@@ -13,16 +13,10 @@ from ml.verification import verify_signature
 
 sns.set(style="whitegrid")
 
-# =========================================================
-# PLOT DIRECTORY (WEB SAFE)
-# =========================================================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PLOT_DIR = os.path.join(BASE_DIR, "..", "static", "plots")
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-# =========================================================
-# HELPER: SAVE KDE PLOT
-# =========================================================
 def save_plot(genuine, impostor, title, filename):
     path = os.path.join(PLOT_DIR, filename)
 
@@ -41,16 +35,11 @@ def save_plot(genuine, impostor, title, filename):
     plt.savefig(path)
     plt.close()
 
-
-# =========================================================
-# SQLITE-BASED DISTRIBUTIONS (FROM LOGS)
-# =========================================================
 def plot_similarity_distributions():
     cnn_path = os.path.join(PLOT_DIR, "cnn_distribution.png")
     hog_path = os.path.join(PLOT_DIR, "hog_distribution.png")
     hyb_path = os.path.join(PLOT_DIR, "hybrid_distribution.png")
 
-    # 🔒 If already generated → DO NOTHING
     if os.path.exists(cnn_path) and os.path.exists(hog_path) and os.path.exists(hyb_path):
         return
 
@@ -106,9 +95,6 @@ def plot_similarity_distributions():
 
     print("[INFO] SQLite-based plots saved.")
 
-# =========================================================
-# ACADEMIC BENCHMARK DISTRIBUTIONS
-# =========================================================
 def evaluate_distributions(num_users=50):
     model = tf.keras.models.load_model(
         MODEL_PATH,
@@ -132,14 +118,12 @@ def evaluate_distributions(num_users=50):
         if len(genuine) < 2:
             continue
 
-        # ---------- Genuine pair ----------
         test = os.path.join(udir, genuine[1])
         c, h, f, _ = verify_signature(model, uid, udir, test)
         cnn_g.append(c)
         hog_g.append(h)
         hyb_g.append(f)
 
-        # ---------- Impostor pair ----------
         other = random.choice([u for u in users if u != uid])
         odir = os.path.join(DATASET_PATH, other)
         og, _ = extract_user_signatures(odir)

@@ -12,9 +12,6 @@ import random
 import numpy as np
 from ml.cnn_model import load_image
 
-# =========================================================
-# TRAINING (same logic as your current version)
-# =========================================================
 def train_model():
     pairs, labels = [], []
     users = [f"{i:03d}" for i in range(1,401)]
@@ -51,9 +48,6 @@ def train_model():
     model.save(MODEL_PATH)
     print("[INFO] Model trained & saved:", MODEL_PATH)
 
-# =========================================================
-# MAIN
-# =========================================================
 def main():
     init_db()
 
