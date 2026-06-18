@@ -7,42 +7,7 @@
     <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
     <link rel="stylesheet" href="/static/fasda.css">
     <link rel="stylesheet" href="/static/theme.css">
-    <style>
-        .reports-wrap { max-width: 900px; }
-        .reports-list { display: grid; gap: 12px; }
-        .report-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 20px 24px;
-            display: flex; align-items: center; justify-content: space-between;
-            gap: 14px; flex-wrap: wrap; text-decoration: none; color: var(--text);
-            transition: transform 0.2s, border-color 0.2s;
-        }
-        .report-card:hover { transform: translateY(-3px); border-color: var(--violet-border); }
-        .report-card-left { flex: 1; min-width: 0; }
-        .report-title { font-size: 15px; font-weight: 700; margin-bottom: 5px; color: var(--text); }
-        .report-meta  { font-size: 12px; color: var(--text-muted); display: flex; gap: 14px; flex-wrap: wrap; }
-        .summary-pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
-        .open-btn {
-            padding: 8px 16px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 700;
-            background: var(--violet-dim); border: 1px solid var(--violet-border); color: var(--violet);
-            white-space: nowrap; flex-shrink: 0;
-        }
-
-        .agg-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 24px;
-        }
-        .agg-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
-        .agg-title { margin: 0; font-size: 16px; font-weight: 700; color: var(--text); }
-        .agg-note  { font-size: 13px; color: var(--text-muted); }
-        .agg-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-        .agg-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .agg-chart-wrap { max-height: 200px; display: flex; align-items: center; justify-content: center; }
-
-        @media (max-width: 640px) {
-            .agg-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+    <link rel="stylesheet" href="/static/pages.css">
 </head>
 <body>
 <header class="mobile-header">

@@ -7,63 +7,7 @@
     <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
     <link rel="stylesheet" href="/static/fasda.css">
     <link rel="stylesheet" href="/static/theme.css">
-    <style>
-        .meta-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 20px 24px;
-            display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
-        }
-        .meta-pill {
-            display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
-            border-radius: 999px; font-size: 12px; font-weight: 600;
-        }
-        .pill-course  { background: var(--violet-dim);  border: 1px solid var(--violet-border);  color: var(--violet); }
-        .pill-genuine { background: var(--emerald-dim); border: 1px solid var(--emerald-border); color: var(--emerald); }
-        .pill-forged  { background: var(--rose-dim);    border: 1px solid var(--rose-border);    color: var(--rose); }
-        .pill-total   { background: var(--surface-2);   border: 1px solid var(--border);         color: var(--text-muted); }
-        .meta-date    { font-size: 12px; color: var(--text-muted); margin-left: auto; }
-
-        .chart-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
-        }
-        .chart-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 22px;
-        }
-        .chart-card h3 { margin: 0 0 14px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
-        .chart-card canvas { max-height: 240px; }
-
-        .table-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: var(--radius-lg); padding: 24px; overflow-x: auto;
-        }
-        .table-card h3 { margin: 0 0 16px; font-size: 17px; font-weight: 700; color: var(--text); }
-        .table-card table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .table-card th, .table-card td { padding: 11px 12px; border-bottom: 1px solid var(--border); text-align: left; }
-        .table-card th { background: var(--surface-2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
-        .table-card tr:last-child td { border-bottom: none; }
-        .table-card tr:hover td { background: var(--surface-2); }
-        .table-card td { color: var(--text); }
-
-        .print-btn {
-            display: inline-flex; align-items: center; padding: 10px 16px; border-radius: var(--radius);
-            background: var(--violet-dim); border: 1px solid var(--violet-border);
-            color: var(--violet); font-size: 13px; font-weight: 600; cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-        }
-        .print-btn:hover { transform: translateY(-1px); background: rgba(139,92,246,0.22); }
-
-        @media print {
-            body { background: white; color: black; padding: 0; }
-            .sidebar, .mobile-header, .page-header { display: none !important; }
-            .app-main { margin-left: 0 !important; }
-            .chart-card, .table-card, .meta-card { border: 1px solid #ccc; box-shadow: none; }
-        }
-
-        @media (max-width: 700px) {
-            .chart-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+    <link rel="stylesheet" href="/static/pages.css">
 </head>
 <body>
 <header class="mobile-header">

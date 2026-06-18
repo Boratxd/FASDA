@@ -7,68 +7,7 @@
     <script>(function(){var t=localStorage.getItem('fasda-theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');})();</script>
     <link rel="stylesheet" href="/static/fasda.css">
     <link rel="stylesheet" href="/static/theme.css">
-    <style>
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px; }
-        .card-title  { margin: 0; font-size: 18px; font-weight: 700; color: var(--text); }
-        .card-desc   { margin: 0 0 18px; color: var(--text-muted); font-size: 14px; line-height: 1.6; }
-
-        .alpha-form { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-        .alpha-slider-wrap { flex: 1; min-width: 200px; }
-        .alpha-slider-wrap label { display: block; margin-bottom: 8px; font-size: 13px; color: var(--text-muted); }
-        input[type="range"] { width: 100%; accent-color: var(--amber); height: 6px; cursor: pointer; }
-        .alpha-value-box {
-            min-width: 86px; padding: 10px 14px; border-radius: var(--radius);
-            border: 1px solid var(--amber-border); background: var(--amber-dim);
-            color: var(--amber); font-size: 20px; font-weight: 700; text-align: center;
-        }
-        .alpha-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; }
-
-        .user-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
-        .tab-btn {
-            padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 600;
-            border: 1px solid var(--border); background: var(--surface-2); color: var(--text-muted);
-            cursor: pointer; transition: all 0.2s;
-        }
-        .tab-btn.active { background: var(--violet-dim); border-color: var(--violet-border); color: var(--violet); }
-        .tab-btn:hover:not(.active) { background: var(--surface-3); color: var(--text); }
-
-        .users-table { width: 100%; border-collapse: collapse; }
-        .users-table th, .users-table td {
-            padding: 12px 12px; text-align: left; border-bottom: 1px solid var(--border);
-            font-size: 13px; vertical-align: middle;
-        }
-        .users-table th { background: var(--surface-2); color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; }
-        .users-table tr:last-child td { border-bottom: none; }
-        .users-table tr:hover td { background: var(--surface-2); }
-
-        .status-badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 600;
-        }
-        .status-approved { background: var(--emerald-dim); border: 1px solid var(--emerald-border); color: var(--emerald); }
-        .status-pending  { background: var(--amber-dim);   border: 1px solid var(--amber-border);   color: var(--amber); }
-        .status-admin    { background: var(--violet-dim);  border: 1px solid var(--violet-border);  color: var(--violet); }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-        .action-form { display: inline; }
-        .btn-approve, .btn-delete {
-            padding: 6px 12px; border: none; border-radius: 8px;
-            font-size: 11px; font-weight: 700; cursor: pointer;
-            transition: transform 0.15s, opacity 0.15s;
-        }
-        .btn-approve { background: var(--emerald-dim); border: 1px solid var(--emerald-border); color: var(--emerald); }
-        .btn-approve:hover { transform: translateY(-1px); opacity: 0.9; }
-        .btn-delete  { background: var(--rose-dim); border: 1px solid var(--rose-border); color: var(--rose); margin-left: 5px; }
-        .btn-delete:hover  { transform: translateY(-1px); opacity: 0.9; }
-        .empty-row td { text-align: center; padding: 28px; color: var(--text-muted); font-size: 13px; }
-        .user-row { transition: opacity 0.2s; }
-        .user-row.hide { display: none; }
-
-        @media (max-width: 860px) {
-            .alpha-form { flex-direction: column; align-items: flex-start; }
-            .users-table th:nth-child(4), .users-table td:nth-child(4) { display: none; }
-        }
-    </style>
+    <link rel="stylesheet" href="/static/pages.css">
 </head>
 <body>
 <header class="mobile-header">
